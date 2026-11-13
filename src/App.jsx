@@ -5,6 +5,15 @@ import {
   FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle
 } from 'lucide-react';
 
+import ReactMarkdown from 'react-markdown';
+
+// Khi hiển thị mô tả bài hát ở trang Player hoặc Trang chủ:
+{currentTrack.description && (
+  <div style={{ marginTop: '0.5rem', fontSize: '0.95rem', fontWeight: '500', color: '#4b5563' }}>
+    <ReactMarkdown>{currentTrack.description}</ReactMarkdown>
+  </div>
+)}
+
 import { supabase } from './supabaseClient';
 
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
