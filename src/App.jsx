@@ -5,8 +5,6 @@ import {
   FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle
 } from 'lucide-react';
 
-import ReactMarkdown from 'react-markdown';
-
 import { supabase } from './supabaseClient';
 
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
@@ -33,7 +31,7 @@ export default function App() {
   // Trạng thái bình luận
   const [newCommentText, setNewCommentText] = useState('');
 
-  // Form Admin (Thêm Sheet & Description)
+  // Form Admin (Thêm Sheet)
   const [newTitle, setNewTitle] = useState('');
   const [newGenre, setNewGenre] = useState('Classical');
   const [newDescription, setNewDescription] = useState('');
@@ -81,7 +79,7 @@ export default function App() {
     let { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (error || !data) {
       const newProf = { id: userId, display_name: user?.user_metadata?.full_name || 'Trương Phi Long', role: 'user' };
-      await supabase.from('profiles').insert([newProf]);
+      await supabase.from('profiles').upsert([newProf]);
       setProfile(newProf);
     } else {
       setProfile(data);
@@ -106,23 +104,13 @@ export default function App() {
   };
 
   const fetchComments = async (sheetId) => {
-    const { data, error } = await supabase.from('comments').select(`*, profiles(display_name)`).eq('sheet_id', sheetId);
+    const { data, error } = await supabase.from('comments').select('*').eq('sheet_id', sheetId).order('created_at', { ascending: false });
     if (!error && data) {
       setComments(data);
     } else {
       setComments([]);
     }
   };
-
-  useEffect(() => {
-    let interval;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setProgress(p => (p >= 100 ? 0 : p + 1));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
 
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google' });
@@ -135,7 +123,6 @@ export default function App() {
     setCurrentView('home');
   };
 
-  // Lấy danh sách các chủ đề (genre) độc đáo từ database sheets
   const dynamicGenres = ['All', ...new Set(sheets.map(s => s.genre).filter(Boolean))];
 
   const filteredSheets = sheets.filter(sheet => {
@@ -149,7 +136,6 @@ export default function App() {
     setCurrentView('player');
     window.scrollTo(0, 0);
     setIsPlaying(true);
-    setProgress(0);
     fetchComments(sheet.id);
   };
 
@@ -169,7 +155,7 @@ export default function App() {
   };
 
   const toggleLike = async () => {
-    if (!isLoggedIn) return alert('Vui lòng đăng nhập để thích!');
+    if (!isLoggedIn) return alert('Vui lòng đăng nhập!');
     const sheetId = currentTrack.id;
     const isLiked = likedSheetIds.includes(sheetId);
 
@@ -192,93 +178,58 @@ export default function App() {
       content: newCommentText
     };
 
-    const { data, error } = await supabase.from('comments').insert([newCmt]).select(`*, profiles(display_name)`);
+    const { data, error } = await supabase.from('comments').insert([newCmt]).select();
     if (!error && data) {
       setComments([data[0], ...comments]);
       setNewCommentText('');
     } else {
-      alert('Lỗi: ' + error.message);
+      alert('Lỗi gửi bình luận: ' + error.message);
     }
   };
 
   const handleAddSheet = async (e) => {
     e.preventDefault();
-    if (!newTitle) return alert('Vui lòng nhập tên bài hát!');
-    if (!user) return alert('Vui lòng đăng nhập tài khoản Admin!');
+    if (!newTitle) return alert('Vui lòng nhập tên bài!');
 
     let pdf_url = '', midi_url = '', audio_url = '';
 
     try {
-      // 1. Upload file PDF
       if (pdfFile) {
-        const filePath = `pdf/${Date.now()}_${pdfFile.name}`;
-        const { data, error: pdfErr } = await supabase.storage.from('sheets-storage').upload(filePath, pdfFile);
-        if (pdfErr) {
-          alert('Lỗi tải file PDF: ' + pdfErr.message);
-          return;
-        }
-        if (data) {
-          pdf_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
-        }
+        const { data } = await supabase.storage.from('sheets-storage').upload(`pdf/${Date.now()}_${pdfFile.name}`, pdfFile);
+        if (data) pdf_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
       }
-
-      // 2. Upload file MIDI
       if (midiFile) {
-        const filePath = `midi/${Date.now()}_${midiFile.name}`;
-        const { data, error: midiErr } = await supabase.storage.from('sheets-storage').upload(filePath, midiFile);
-        if (midiErr) {
-          alert('Lỗi tải file MIDI: ' + midiErr.message);
-          return;
-        }
-        if (data) {
-          midi_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
-        }
+        const { data } = await supabase.storage.from('sheets-storage').upload(`midi/${Date.now()}_${midiFile.name}`, midiFile);
+        if (data) midi_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
       }
-
-      // 3. Upload file Audio (MP3) - Quan trọng để hiện nút phát
       if (audioFile) {
-        const filePath = `audio/${Date.now()}_${audioFile.name}`;
-        const { data, error: audioErr } = await supabase.storage.from('sheets-storage').upload(filePath, audioFile);
-        if (audioErr) {
-          alert('Lỗi tải file Audio: ' + audioErr.message);
-          return;
-        }
-        if (data) {
-          audio_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
-        }
-      }
-
-      // 4. Lưu vào Database bảng sheets
-      const newItem = {
-        title: newTitle,
-        genre: newGenre,
-        description: newDescription,
-        pdf_url, 
-        midi_url, 
-        audio_url,
-        uploader_id: user.id
-      };
-
-      const { data, error: dbError } = await supabase.from('sheets').insert([newItem]).select();
-      if (dbError) {
-        alert('Lỗi lưu Database: ' + dbError.message);
-        return;
-      }
-
-      if (data) {
-        setSheets([data[0], ...sheets]);
-        setNewTitle('');
-        setNewDescription('');
-        setPdfFile(null); 
-        setMidiFile(null); 
-        setAudioFile(null);
-        alert('Đã tải lên và lưu Database thành công!');
+        const { data } = await supabase.storage.from('sheets-storage').upload(`audio/${Date.now()}_${audioFile.name}`, audioFile);
+        if (data) audio_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
       }
     } catch (err) {
-      console.error('Lỗi ngoại lệ:', err);
-      alert('Có lỗi xảy ra, vui lòng kiểm tra Console (F12)');
+      console.log(err);
+    }
+
+    const newItem = {
+      title: newTitle,
+      genre: newGenre,
+      description: newDescription,
+      pdf_url, midi_url, audio_url,
+      uploader_id: user.id
+    };
+
+    const { data, error } = await supabase.from('sheets').insert([newItem]).select();
+    if (!error && data) {
+      setSheets([data[0], ...sheets]);
+      setNewTitle('');
+      setNewDescription('');
+      setPdfFile(null); setMidiFile(null); setAudioFile(null);
+      alert('Tải lên thành công!');
+    } else {
+      alert('Lỗi: ' + error.message);
     }
   };
+
   const handleAddPost = async (e) => {
     e.preventDefault();
     if (!newPostTitle || !newPostContent) return;
@@ -287,7 +238,7 @@ export default function App() {
     if (!error && data) {
       setPosts([data[0], ...posts]);
       setNewPostTitle(''); setNewPostContent('');
-      alert('Đăng bài viết thành công!');
+      alert('Đăng bài thành công!');
     }
   };
 
@@ -321,10 +272,24 @@ export default function App() {
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
       
-      <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* HEADER TÍCH HỢP PLAYER MINI TRÊN MENUBAR */}
+      <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => setCurrentView('home')}>
           jang.logn18 music
         </div>
+
+        {/* PLAYER TRÊN MENUBAR */}
+        {currentTrack && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: '#f3f4f6', padding: '0.25rem 0.75rem', border: '2px solid #000' }}>
+            <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '2rem', height: '2rem', backgroundColor: '#3B2AA2', color: '#fff' }}>
+              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+            </button>
+            <div className="truncate" style={{ maxWidth: '150px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+              {currentTrack.title}
+            </div>
+            {currentTrack.audio_url && <audio src={currentTrack.audio_url} autoPlay={isPlaying} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />}
+          </div>
+        )}
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {isLoggedIn ? (
@@ -345,7 +310,7 @@ export default function App() {
         {currentView === 'home' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
             
-            {/* PLAY STATS THẬT & TÌM KIẾM/CHỦ ĐỀ */}
+            {/* PLAY STATS & TÌM KIẾM */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
               <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
                 <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Dữ Liệu Nghe (Play Stats)</h2>
@@ -366,7 +331,6 @@ export default function App() {
                   className="brutal-border"
                   style={{ padding: '0.65rem 1rem', fontSize: '0.95rem', width: '100%', fontWeight: 'bold' }}
                 />
-                {/* HIỂN THỊ ĐỘNG CÁC CHỦ ĐỀ CÓ TRONG DATABASE */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                   {dynamicGenres.map((genre, idx) => (
                     <button 
@@ -382,7 +346,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* ADMIN DASHBOARD (TẢI NHẠC CÓ DESCRIPTION & ĐĂNG BÀI VIẾT) */}
+            {/* ADMIN DASHBOARD */}
             {isAdmin && (
               <div className="brutal-border brutal-shadow-yellow" style={{ padding: '2rem', backgroundColor: '#fff9e6', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.75rem', color: '#b45309' }}>🛡️ Admin Dashboard (Trương Phi Long)</h2>
@@ -394,7 +358,7 @@ export default function App() {
                     <input type="text" placeholder="Chủ đề / Thể loại (Genre)..." value={newGenre} onChange={e => setNewGenre(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff' }} />
                     
                     <textarea 
-                      placeholder="Mô tả / Description (Hỗ trợ định dạng văn bản)..." 
+                      placeholder="Mô tả / Description..." 
                       value={newDescription} 
                       onChange={e => setNewDescription(e.target.value)} 
                       className="brutal-border" 
@@ -405,7 +369,7 @@ export default function App() {
                     <input type="file" accept=".pdf" onChange={e => setPdfFile(e.target.files[0])} />
                     <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>MIDI:</label>
                     <input type="file" accept=".mid" onChange={e => setMidiFile(e.target.files[0])} />
-                    <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Audio:</label>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Audio (MP3):</label>
                     <input type="file" accept="audio/*" onChange={e => setAudioFile(e.target.files[0])} />
 
                     <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem', backgroundColor: '#39EFB2', marginTop: '0.5rem' }}><Upload size={16} /> Lưu Lên Database</button>
@@ -474,16 +438,23 @@ export default function App() {
           </div>
         )}
 
-        {/* PLAYER */}
+        {/* PLAYER CHI TIẾT */}
         {currentView === 'player' && currentTrack && (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="brutal-shadow-mint" style={{ padding: '1.25rem', marginBottom: '2rem', borderBottom: '4px solid #000', backgroundColor: '#fff' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div className="brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#fff', borderBottom: '4px solid #000' }}>
               <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', marginBottom: '1rem' }}>
                 <ChevronLeft size={18} /> Quay Lại
               </button>
               <h1 className="font-title uppercase" style={{ fontSize: '1.75rem' }}>{currentTrack.title}</h1>
               {currentTrack.description && <p style={{ marginTop: '0.5rem', fontSize: '0.95rem', fontWeight: '500', color: '#4b5563', whiteSpace: 'pre-line' }}>{currentTrack.description}</p>}
               
+              {/* TRÌNH PHÁT NHẠC AUDIO THỰC TẾ */}
+              {currentTrack.audio_url && (
+                <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                  <audio controls src={currentTrack.audio_url} style={{ width: '100%' }} />
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <button onClick={toggleLike} className="brutal-btn brutal-border" style={{ padding: '0.5rem', backgroundColor: isCurrentLiked ? '#ef4444' : '#fff', color: isCurrentLiked ? '#fff' : '#000' }}>
                   <Heart size={18} fill={isCurrentLiked ? '#fff' : 'none'} /> Thích
@@ -498,6 +469,17 @@ export default function App() {
               </div>
             </div>
 
+            {/* KHUNG HIỂN THỊ TRỰC QUAN FILE PDF */}
+            {currentTrack.pdf_url ? (
+              <div className="brutal-border brutal-shadow-purple" style={{ width: '100%', height: '700px', backgroundColor: '#fff' }}>
+                <iframe src={currentTrack.pdf_url} title={currentTrack.title} style={{ width: '100%', height: '100%', border: 'none' }} />
+              </div>
+            ) : (
+              <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#f9fafb' }}>
+                <p className="font-title uppercase" style={{ color: '#9ca3af' }}>Chưa có file PDF cho bản nhạc này</p>
+              </div>
+            )}
+
             {/* BÌNH LUẬN */}
             <div className="brutal-border brutal-shadow-yellow" style={{ padding: '1.5rem', backgroundColor: '#fff' }}>
               <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bình Luận ({comments.length})</h2>
@@ -511,7 +493,6 @@ export default function App() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {comments.map(cmt => (
                   <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb' }}>
-                    <strong style={{ textTransform: 'uppercase' }}>{cmt.profiles?.display_name || 'Người dùng'}</strong>
                     <p style={{ marginTop: '0.25rem' }}>{cmt.content}</p>
                   </div>
                 ))}
@@ -547,7 +528,6 @@ export default function App() {
       {/* FOOTER */}
       <footer style={{ marginTop: '5rem', borderTop: '4px solid #000', backgroundColor: '#3B2AA2', padding: '4rem 1rem', position: 'relative', overflow: 'hidden', color: '#fff' }}>
         <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
             <div className="brutal-border brutal-shadow-yellow" style={{ width: '8rem', height: '8rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
               <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -560,30 +540,6 @@ export default function App() {
                 <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.5rem 1rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
                   Engineering & Architecture Undergraduate - HCMUT
                 </p>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-            {['Facebook', 'Instagram', 'YouTube', 'SoundCloud'].map(social => (
-              <button key={social} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0 1rem', height: '3rem', backgroundColor: '#fff', color: '#000', fontSize: '0.875rem' }}>
-                {social}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ marginTop: '2rem', borderTop: '4px solid rgba(255,255,255,0.2)', paddingTop: '2rem', maxWidth: '600px' }}>
-            <h3 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#FACB54', color: '#000', padding: '0.5rem 1rem', fontSize: '1.5rem', marginBottom: '1.25rem' }}>
-              Donate / Ủng hộ
-            </h3>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <div className="brutal-border brutal-shadow-purple" style={{ flex: 1, backgroundColor: '#fff', color: '#000', padding: '0.75rem 1rem', fontWeight: 'bold', fontSize: '0.875rem', minWidth: '200px' }}>
-                <span className="uppercase" style={{ color: '#3B2AA2', display: 'block', marginBottom: '0.25rem' }}>VCB Digibank</span> 
-                1012345678<br/>TRUONG PHI LONG
-              </div>
-              <div className="brutal-border brutal-shadow-mint" style={{ flex: 1, backgroundColor: '#fff', color: '#000', padding: '0.75rem 1rem', fontWeight: 'bold', fontSize: '0.875rem', minWidth: '200px' }}>
-                <span className="uppercase" style={{ color: '#a50064', display: 'block', marginBottom: '0.25rem' }}>MoMo</span> 
-                0987654321<br/>TRUONG PHI LONG
               </div>
             </div>
           </div>
