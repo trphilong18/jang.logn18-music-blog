@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, Pause, Heart, Share2, 
   User, FileText, ChevronLeft, Volume2,
-  FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle, Calendar
+  FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle, Calendar,
+  ExternalLink, Coffee, Mail, Github, Youtube, Music
 } from 'lucide-react';
 
 import { supabase } from './supabaseClient';
@@ -132,6 +133,16 @@ export default function App() {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const formatDateTime = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN', {
@@ -468,15 +479,18 @@ export default function App() {
               </h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 320px))', gap: '1.5rem' }}>
                 {filteredSheets.map(sheet => (
-                  <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <h3 className="font-title uppercase truncate" style={{ fontSize: '1.125rem' }}>{sheet.title}</h3>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: 'bold', color: '#4b5563' }}>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#4b5563' }}>
                       <span className="uppercase">{sheet.genre}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Calendar size={12} /> {formatDate(sheet.created_at)}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Calendar size={13} /> {formatDate(sheet.created_at)}
                       </span>
                     </div>
-                    {sheet.description && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.5rem' }}>{sheet.description}</p>}
+
+                    {sheet.description && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280' }}>{sheet.description}</p>}
+                    
                     <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', width: '100%' }}>
                       <Play size={16} /> Nghe & Xem Sheet
                     </button>
@@ -535,11 +549,12 @@ export default function App() {
                 </div>
               </div>
 
-              <h1 className="font-title uppercase" style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>{currentTrack.title}</h1>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <p className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '0.95rem' }}>Thể loại: {currentTrack.genre}</p>
-                <p style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <Calendar size={14} /> Ngày đăng: {formatDate(currentTrack.created_at)}
+              <h1 className="font-title uppercase" style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>{currentTrack.title}</h1>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#4b5563' }}>
+                <p className="uppercase">Thể loại: {currentTrack.genre}</p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Calendar size={14} /> Ngày đăng: {formatDateTime(currentTrack.created_at)}
                 </p>
               </div>
 
@@ -608,7 +623,7 @@ export default function App() {
                         {cmt.user_name || 'Người dùng ẩn danh'}
                       </span>
                       <span style={{ fontSize: '0.7rem', color: '#6b7280', fontWeight: 'bold' }}>
-                        {formatDate(cmt.created_at)}
+                        {formatDateTime(cmt.created_at)}
                       </span>
                     </div>
                     <p style={{ fontWeight: '500', marginTop: '0.25rem' }}>{cmt.content}</p>
@@ -642,23 +657,61 @@ export default function App() {
         )}
       </main>
 
+      {/* FOOTER ĐÃ ĐƯỢC BỔ SUNG ĐẦY ĐỦ CÁC NÚT LIÊN KẾT VÀ DONATE */}
       <footer style={{ marginTop: '5rem', borderTop: '4px solid #000', backgroundColor: '#3B2AA2', padding: '4rem 1rem', position: 'relative', overflow: 'hidden', color: '#fff' }}>
-        <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-            <div className="brutal-border brutal-shadow-yellow" style={{ width: '8rem', height: '8rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
-              <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <div>
-              <h2 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#fff', color: '#000', padding: '0.5rem 1.25rem', fontSize: '2.25rem' }}>
-                Trương Phi Long
-              </h2>
-              <div style={{ marginTop: '0.25rem' }}>
-                <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.5rem 1rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
-                  Engineering & Architecture Undergraduate - HCMUT
-                </p>
+        <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+              <div className="brutal-border brutal-shadow-yellow" style={{ width: '7rem', height: '7rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
+                <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div>
+                <h2 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#fff', color: '#000', padding: '0.4rem 1rem', fontSize: '2rem', marginBottom: '0.5rem' }}>
+                  Trương Phi Long
+                </h2>
+                <div>
+                  <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.4rem 0.8rem', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                    Engineering & Architecture Undergraduate - HCMUT
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* NÚT DONATE / ỦNG HỘ */}
+            <a 
+              href="https://me.momo.vn" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="brutal-btn brutal-border brutal-shadow-mint uppercase" 
+              style={{ padding: '0.75rem 1.5rem', backgroundColor: '#FACB54', color: '#000', textDecoration: 'none', gap: '0.5rem', fontSize: '0.95rem' }}
+            >
+              <Coffee size={18} /> Ủng Hộ Tác Giả (Donate)
+            </a>
           </div>
+
+          {/* CÁC ĐƯỜNG DẪN LIÊN KẾT */}
+          <div style={{ borderTop: '2px dashed rgba(255,255,255,0.3)', paddingTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <a href="https://musescore.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.8rem', backgroundColor: '#fff', color: '#000', fontSize: '0.8rem', textDecoration: 'none', gap: '0.35rem' }}>
+                <Music size={14} /> MuseScore
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.8rem', backgroundColor: '#fff', color: '#000', fontSize: '0.8rem', textDecoration: 'none', gap: '0.35rem' }}>
+                <Youtube size={14} /> YouTube
+              </a>
+              <a href="https://github.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.8rem', backgroundColor: '#fff', color: '#000', fontSize: '0.8rem', textDecoration: 'none', gap: '0.35rem' }}>
+                <Github size={14} /> GitHub
+              </a>
+              <a href="mailto:trphilong18@gmail.com" className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.8rem', backgroundColor: '#fff', color: '#000', fontSize: '0.8rem', textDecoration: 'none', gap: '0.35rem' }}>
+                <Mail size={14} /> Liên hệ Email
+              </a>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.8)' }}>
+              © 2026 jang.logn18 music. All rights reserved.
+            </p>
+          </div>
+
         </div>
       </footer>
     </div>
