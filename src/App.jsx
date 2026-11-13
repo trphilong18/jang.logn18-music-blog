@@ -67,8 +67,8 @@ export default function App() {
 
 /* KHAI BÁO PHÔNG CHỮ TÙY CHỈNH TỪ THƯ MỤC PUBLIC */
 @font-face {
-  font-family: 'BD StreetSigns';
-  src: url('/fonts/BDStreetSigns.ttf') format('truetype'); 
+  font-family: 'BD StreetSignsSans';
+  src: url('/fonts/BDStreetSignsSans-Standard.otf') format('opentype'); 
   /* Nếu đuôi file của bạn là .otf thì đổi format thành 'opentype' */
   font-weight: normal;
   font-style: normal;
@@ -79,7 +79,7 @@ export default function App() {
 
 /* Cập nhật lại class font-title */
 .font-title { 
-  font-family: 'BD StreetSigns', Impact, system-ui, sans-serif !important; 
+  font-family: 'BD StreetSignsSans', Impact, system-ui, sans-serif !important; 
   font-weight: normal; 
 }
       `}</style>
