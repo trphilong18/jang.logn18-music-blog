@@ -204,31 +204,51 @@ export default function App() {
   const handleAddSheet = async (e) => {
     e.preventDefault();
     if (!newTitle) return alert('Vui lòng nhập tên bài hát!');
-    if (!user) return alert('Vui lòng đăng nhập lại tài khoản Admin!');
+    if (!user) return alert('Vui lòng đăng nhập tài khoản Admin!');
 
     let pdf_url = '', midi_url = '', audio_url = '';
 
     try {
-      // 1. Upload file PDF nếu có chọn
+      // 1. Upload file PDF
       if (pdfFile) {
-        const { data, error: pdfErr } = await supabase.storage.from('sheets-storage').upload(`pdf/${Date.now()}_${pdfFile.name}`, pdfFile);
-        if (pdfErr) throw pdfErr;
-        if (data) pdf_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
-      }
-      // 2. Upload file MIDI nếu có chọn
-      if (midiFile) {
-        const { data, error: midiErr } = await supabase.storage.from('sheets-storage').upload(`midi/${Date.now()}_${midiFile.name}`, midiFile);
-        if (midiErr) throw midiErr;
-        if (data) midi_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
-      }
-      // 3. Upload file Audio nếu có chọn
-      if (audioFile) {
-        const { data, error: audioErr } = await supabase.storage.from('sheets-storage').upload(`audio/${Date.now()}_${audioFile.name}`, audioFile);
-        if (audioErr) throw audioErr;
-        if (data) audio_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
+        const filePath = `pdf/${Date.now()}_${pdfFile.name}`;
+        const { data, error: pdfErr } = await supabase.storage.from('sheets-storage').upload(filePath, pdfFile);
+        if (pdfErr) {
+          alert('Lỗi tải file PDF: ' + pdfErr.message);
+          return;
+        }
+        if (data) {
+          pdf_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
+        }
       }
 
-      // 4. Lưu thông tin vào Database bảng sheets
+      // 2. Upload file MIDI
+      if (midiFile) {
+        const filePath = `midi/${Date.now()}_${midiFile.name}`;
+        const { data, error: midiErr } = await supabase.storage.from('sheets-storage').upload(filePath, midiFile);
+        if (midiErr) {
+          alert('Lỗi tải file MIDI: ' + midiErr.message);
+          return;
+        }
+        if (data) {
+          midi_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
+        }
+      }
+
+      // 3. Upload file Audio (MP3) - Quan trọng để hiện nút phát
+      if (audioFile) {
+        const filePath = `audio/${Date.now()}_${audioFile.name}`;
+        const { data, error: audioErr } = await supabase.storage.from('sheets-storage').upload(filePath, audioFile);
+        if (audioErr) {
+          alert('Lỗi tải file Audio: ' + audioErr.message);
+          return;
+        }
+        if (data) {
+          audio_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
+        }
+      }
+
+      // 4. Lưu vào Database bảng sheets
       const newItem = {
         title: newTitle,
         genre: newGenre,
@@ -240,7 +260,10 @@ export default function App() {
       };
 
       const { data, error: dbError } = await supabase.from('sheets').insert([newItem]).select();
-      if (dbError) throw dbError;
+      if (dbError) {
+        alert('Lỗi lưu Database: ' + dbError.message);
+        return;
+      }
 
       if (data) {
         setSheets([data[0], ...sheets]);
@@ -249,14 +272,13 @@ export default function App() {
         setPdfFile(null); 
         setMidiFile(null); 
         setAudioFile(null);
-        alert('Đã lưu sheet nhạc thành công lên Database!');
+        alert('Đã tải lên và lưu Database thành công!');
       }
     } catch (err) {
-      console.error('Lỗi chi tiết:', err);
-      alert('Không thể lưu: ' + (err.message || JSON.stringify(err)));
+      console.error('Lỗi ngoại lệ:', err);
+      alert('Có lỗi xảy ra, vui lòng kiểm tra Console (F12)');
     }
   };
-
   const handleAddPost = async (e) => {
     e.preventDefault();
     if (!newPostTitle || !newPostContent) return;
