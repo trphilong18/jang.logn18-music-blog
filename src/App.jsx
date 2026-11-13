@@ -203,44 +203,57 @@ export default function App() {
 
   const handleAddSheet = async (e) => {
     e.preventDefault();
-    if (!newTitle) return alert('Vui lòng nhập tên bài!');
+    if (!newTitle) return alert('Vui lòng nhập tên bài hát!');
+    if (!user) return alert('Vui lòng đăng nhập lại tài khoản Admin!');
 
     let pdf_url = '', midi_url = '', audio_url = '';
 
     try {
+      // 1. Upload file PDF nếu có chọn
       if (pdfFile) {
-        const { data } = await supabase.storage.from('sheets-storage').upload(`pdf/${Date.now()}_${pdfFile.name}`, pdfFile);
+        const { data, error: pdfErr } = await supabase.storage.from('sheets-storage').upload(`pdf/${Date.now()}_${pdfFile.name}`, pdfFile);
+        if (pdfErr) throw pdfErr;
         if (data) pdf_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
       }
+      // 2. Upload file MIDI nếu có chọn
       if (midiFile) {
-        const { data } = await supabase.storage.from('sheets-storage').upload(`midi/${Date.now()}_${midiFile.name}`, midiFile);
+        const { data, error: midiErr } = await supabase.storage.from('sheets-storage').upload(`midi/${Date.now()}_${midiFile.name}`, midiFile);
+        if (midiErr) throw midiErr;
         if (data) midi_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
       }
+      // 3. Upload file Audio nếu có chọn
       if (audioFile) {
-        const { data } = await supabase.storage.from('sheets-storage').upload(`audio/${Date.now()}_${audioFile.name}`, audioFile);
+        const { data, error: audioErr } = await supabase.storage.from('sheets-storage').upload(`audio/${Date.now()}_${audioFile.name}`, audioFile);
+        if (audioErr) throw audioErr;
         if (data) audio_url = supabase.storage.from('sheets-storage').getPublicUrl(data.path).data.publicUrl;
       }
+
+      // 4. Lưu thông tin vào Database bảng sheets
+      const newItem = {
+        title: newTitle,
+        genre: newGenre,
+        description: newDescription,
+        pdf_url, 
+        midi_url, 
+        audio_url,
+        uploader_id: user.id
+      };
+
+      const { data, error: dbError } = await supabase.from('sheets').insert([newItem]).select();
+      if (dbError) throw dbError;
+
+      if (data) {
+        setSheets([data[0], ...sheets]);
+        setNewTitle('');
+        setNewDescription('');
+        setPdfFile(null); 
+        setMidiFile(null); 
+        setAudioFile(null);
+        alert('Đã lưu sheet nhạc thành công lên Database!');
+      }
     } catch (err) {
-      console.log(err);
-    }
-
-    const newItem = {
-      title: newTitle,
-      genre: newGenre,
-      description: newDescription,
-      pdf_url, midi_url, audio_url,
-      uploader_id: user.id
-    };
-
-    const { data, error } = await supabase.from('sheets').insert([newItem]).select();
-    if (!error && data) {
-      setSheets([data[0], ...sheets]);
-      setNewTitle('');
-      setNewDescription('');
-      setPdfFile(null); setMidiFile(null); setAudioFile(null);
-      alert('Tải lên sheet thành công!');
-    } else {
-      alert('Lỗi: ' + error.message);
+      console.error('Lỗi chi tiết:', err);
+      alert('Không thể lưu: ' + (err.message || JSON.stringify(err)));
     }
   };
 
