@@ -17,12 +17,8 @@ const MOCK_SHEETS = [
 ];
 
 const MOCK_POSTS = [
-  { id: '1', title: 'Hành trình chinh phục La Campanella', date: '24/10/2026', excerpt: 'Kinh nghiệm vượt qua những đoạn nhảy quãng khó nhằn...', content: 'Nội dung chi tiết...' },
+  { id: '1', title: 'Hành trình chinh phục La Campanella', date: '24/10/2026', excerpt: 'Kinh nghiệm vượt qua những đoạn nhảy quãng khó nhằn...', content: 'Nội dung chi tiết bài viết...' },
   { id: '2', title: 'Tại sao mình thích dùng MuseScore hơn Sibelius?', date: '15/10/2026', excerpt: 'So sánh chi tiết 2 phần mềm viết nhạc...', content: 'MuseScore hoàn toàn miễn phí...' }
-];
-
-const MOCK_COMMENTS = [
-  { id: 1, user: 'Hoàng Trần', text: 'Bản sheet này rất chi tiết, cảm ơn bạn!', time: '2 giờ trước' }
 ];
 
 export default function App() {
