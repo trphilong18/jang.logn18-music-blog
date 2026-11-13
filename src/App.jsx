@@ -3,7 +3,7 @@ import {
   Play, Pause, Heart, Share2, 
   User, FileText, ChevronLeft, Volume2,
   FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle, Calendar,
-  ExternalLink, Coffee, Mail, Music, Video, Globe, Camera
+  Coffee
 } from 'lucide-react';
 
 import { supabase } from './supabaseClient';
@@ -657,7 +657,7 @@ export default function App() {
         )}
       </main>
 
-      {/* FOOTER ĐÃ TÍCH HỢP ĐẦY ĐỦ PROFILE GỐC + MẠNG XÃ HỘI + DONATE */}
+      {/* FOOTER ĐÃ CẬP NHẬT: GỐC TRƯƠNG PHI LONG + LIÊN KẾT (KHÔNG ICON) + DONATE (KHÔNG COPYRIGHT) */}
       <footer style={{ marginTop: '5rem', borderTop: '4px solid #000', backgroundColor: '#3B2AA2', padding: '4rem 1rem', position: 'relative', overflow: 'hidden', color: '#fff' }}>
         <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           
@@ -679,7 +679,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* NÚT DONATE / ỦNG HỘ */}
+            {/* THÔNG TIN DONATE / ỦNG HỘ */}
             <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#FACB54', color: '#000', display: 'flex', flexDirection: 'column', gap: '0.5rem', maxWidth: '320px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1rem' }}>
                 <Coffee size={20} /> Ủng Hộ Tác Giả (Donate)
@@ -691,29 +691,23 @@ export default function App() {
             </div>
           </div>
 
-          {/* PHẦN 2: CÁC NÚT LIÊN KẾT MẠNG XÃ HỘI */}
-          <div style={{ borderTop: '2px dashed rgba(255,255,255,0.3)', paddingTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
-                <Camera size={16} /> Instagram
-              </a>
-              <a href="https://facebook.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
-                <Globe size={16} /> Facebook
-              </a>
-              <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
-                <Video size={16} /> TikTok
-              </a>
-              <a href="https://soundcloud.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
-                <Music size={16} /> SoundCloud
-              </a>
-              <a href="https://youtube.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
-                <Play size={16} /> YouTube
-              </a>
-            </div>
-
-            <p style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.8)' }}>
-              © 2026 jang.logn18 music. All rights reserved.
-            </p>
+          {/* PHẦN 2: CÁC NÚT LIÊN KẾT MẠNG XÃ HỘI (HOÀN TOÀN KHÔNG CÓ ICON & KHÔNG COPYRIGHT) */}
+          <div style={{ borderTop: '2px dashed rgba(255,255,255,0.3)', paddingTop: '2rem', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+              Instagram
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+              Facebook
+            </a>
+            <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+              TikTok
+            </a>
+            <a href="https://soundcloud.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+              SoundCloud
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+              YouTube
+            </a>
           </div>
 
         </div>
