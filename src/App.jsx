@@ -17,8 +17,10 @@ export default function App() {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [currentPost, setCurrentPost] = useState(null);
   
-  // Trạng thái phát nhạc toàn cục (tránh xung đột nhiều nguồn)
+  // Trạng thái phát nhạc & Thanh tiến trình tùy chỉnh
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
 
   const [sheets, setSheets] = useState([]);
@@ -77,11 +79,11 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Điều khiển thẻ audio toàn cục khi isPlaying hoặc currentTrack thay đổi
+  // Xử lý sự kiện phát/tạm dừng âm thanh đồng bộ giữa Menubar và trang Player
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.play().catch(e => console.log("Audio play blocked:", e));
+        audioRef.current.play().catch(err => console.log("Play error:", err));
       } else {
         audioRef.current.pause();
       }
@@ -116,8 +118,14 @@ export default function App() {
     }
   };
 
+  // Lấy bình luận kèm theo tên hiển thị từ bảng profiles
   const fetchComments = async (sheetId) => {
-    const { data, error } = await supabase.from('comments').select('*').eq('sheet_id', sheetId).order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*, profiles(display_name)')
+      .eq('sheet_id', sheetId)
+      .order('created_at', { ascending: false });
+      
     if (!error && data) {
       setComments(data);
     } else {
@@ -149,7 +157,7 @@ export default function App() {
   const handlePlaySheet = (sheet) => {
     if (currentTrack?.id !== sheet.id) {
       setCurrentTrack(sheet);
-      setIsPlaying(false); // Mở ra phải bấm play mới phát, không tự động phát
+      setIsPlaying(false);
     }
     setCurrentView('player');
     window.scrollTo(0, 0);
@@ -167,6 +175,28 @@ export default function App() {
       setCurrentTrack(sheets[0]);
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      setDuration(audioRef.current.duration || 0);
+    }
+  };
+
+  const handleSeek = (e) => {
+    const newTime = e.target.value;
+    setCurrentTime(newTime);
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+    }
+  };
+
+  const formatTime = (secs) => {
+    if (isNaN(secs)) return "0:00";
+    const minutes = Math.floor(secs / 60);
+    const seconds = Math.floor(secs % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
   const handleShare = () => {
@@ -198,7 +228,7 @@ export default function App() {
       content: newCommentText
     };
 
-    const { data, error } = await supabase.from('comments').insert([newCmt]).select();
+    const { data, error } = await supabase.from('comments').insert([newCmt]).select('*, profiles(display_name)');
     if (!error && data) {
       setComments([data[0], ...comments]);
       setNewCommentText('');
@@ -292,11 +322,12 @@ export default function App() {
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
       
-      {/* THẺ AUDIO TOÀN CỤC ĐƯỢC QUẢN LÝ DUY NHẤT TẠI ĐÂY (TRÁNH XUNG ĐỘT) */}
+      {/* THẺ AUDIO TOÀN CỤC CHẠY NGẦM ĐỒNG BỘ */}
       {currentTrack?.audio_url && (
         <audio 
           ref={audioRef} 
           src={currentTrack.audio_url} 
+          onTimeUpdate={handleTimeUpdate}
           onEnded={() => setIsPlaying(false)}
         />
       )}
@@ -471,7 +502,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PLAYER CHI TIẾT (ĐÃ REDESIGN LẠI GỌN GÀNG, SANG TRỌNG) */}
+        {/* PLAYER CHI TIẾT (CUSTOM UI HOÀN CHỈNH, ĐỒNG BỘ THANH TIẾN TRÌNH) */}
         {currentView === 'player' && currentTrack && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', backgroundColor: '#fff' }}>
@@ -494,15 +525,27 @@ export default function App() {
               <p className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '0.95rem', marginBottom: '1rem' }}>Thể loại: {currentTrack.genre}</p>
               {currentTrack.description && <p style={{ fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', marginBottom: '1.5rem', lineHeight: 1.6 }}>{currentTrack.description}</p>}
               
-              {/* TRÌNH ĐIỀU KHIỂN PHÁT NHẠC (AUDIO PLAYER STYLING) */}
+              {/* TRÌNH ĐIỀU KHIỂN AUDIO CUSTOM BRUTALIST (THANH TIẾN TRÌNH HOẠT ĐỘNG CHUẨN) */}
               {currentTrack.audio_url ? (
-                <div className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f3f4f6', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '3rem', height: '3rem', backgroundColor: '#3B2AA2', color: '#fff', flexShrink: 0 }}>
-                    {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-                  </button>
-                  <div style={{ flex: 1 }}>
-                    <p className="uppercase" style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>Đang phát âm thanh trực tiếp</p>
-                    <audio controls src={currentTrack.audio_url} style={{ width: '100%', height: '35px' }} />
+                <div className="brutal-border" style={{ padding: '1.25rem', backgroundColor: '#f3f4f6', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '3rem', height: '3rem', backgroundColor: '#3B2AA2', color: '#fff', flexShrink: 0 }}>
+                      {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                    </button>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                        <span>Đang phát âm thanh trực tiếp</span>
+                        <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max={duration || 100} 
+                        value={currentTime} 
+                        onChange={handleSeek}
+                        style={{ width: '100%', cursor: 'pointer', accentColor: '#3B2AA2' }}
+                      />
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -531,7 +574,7 @@ export default function App() {
               </div>
             )}
 
-            {/* BÌNH LUẬN */}
+            {/* BÌNH LUẬN (ĐÃ FIX HIỆN TÊN NGƯỜI DÙNG) */}
             <div className="brutal-border brutal-shadow-yellow" style={{ padding: '1.5rem', backgroundColor: '#fff' }}>
               <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bình Luận ({comments.length})</h2>
               {isLoggedIn ? (
@@ -543,8 +586,11 @@ export default function App() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {comments.map(cmt => (
-                  <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb' }}>
-                    <p style={{ marginTop: '0.25rem', fontWeight: '500' }}>{cmt.content}</p>
+                  <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#3B2AA2' }}>
+                      {cmt.profiles?.display_name || 'Người dùng ẩn danh'}
+                    </span>
+                    <p style={{ fontWeight: '500' }}>{cmt.content}</p>
                   </div>
                 ))}
               </div>
