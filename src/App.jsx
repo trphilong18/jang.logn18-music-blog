@@ -548,4 +548,119 @@ export default function App() {
               {currentTrack.audio_url ? (
                 <div className="brutal-border" style={{ padding: '1.25rem', backgroundColor: '#f3f4f6', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '3rem', height
+                    <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '3rem', height: '3rem', backgroundColor: '#3B2AA2', color: '#fff', flexShrink: 0 }}>
+                      {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                    </button>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                        <span>Đang phát âm thanh trực tiếp</span>
+                        <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max={duration || 100} 
+                        value={currentTime} 
+                        onChange={handleSeek}
+                        style={{ width: '100%', cursor: 'pointer', accentColor: '#3B2AA2' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="brutal-border" style={{ padding: '0.75rem', backgroundColor: '#fef3c7', marginBottom: '1.5rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                  ⚠️ Bài hát này chưa có file Audio MP3 đính kèm.
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '2px solid #000', paddingTop: '1.25rem' }}>
+                {currentTrack.pdf_url && <a href={currentTrack.pdf_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#3B2AA2', color: '#fff', textDecoration: 'none', gap: '0.5rem' }}><FileDown size={16} /> Tải PDF Sheet</a>}
+                {currentTrack.midi_url && <a href={currentTrack.midi_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#FACB54', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><Disc size={16} /> Tải File MIDI</a>}
+                {currentTrack.audio_url && <a href={currentTrack.audio_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#fff', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><FileAudio size={16} /> Tải Audio MP3</a>}
+              </div>
+
+            </div>
+
+            {currentTrack.pdf_url ? (
+              <div className="brutal-border brutal-shadow-purple" style={{ width: '100%', height: '700px', backgroundColor: '#fff' }}>
+                <iframe src={currentTrack.pdf_url} title={currentTrack.title} style={{ width: '100%', height: '100%', border: 'none' }} />
+              </div>
+            ) : (
+              <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#f9fafb' }}>
+                <p className="font-title uppercase" style={{ color: '#9ca3af' }}>Chưa có file PDF xem trước cho bản nhạc này</p>
+              </div>
+            )}
+
+            <div className="brutal-border brutal-shadow-yellow" style={{ padding: '1.5rem', backgroundColor: '#fff' }}>
+              <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bình Luận ({comments.length})</h2>
+              {isLoggedIn ? (
+                <form onSubmit={handleAddComment} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                  <textarea value={newCommentText} onChange={e => setNewCommentText(e.target.value)} className="brutal-border" style={{ padding: '0.75rem', minHeight: '80px', backgroundColor: '#fff' }} placeholder="Nhập bình luận của bạn..."></textarea>
+                  <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', alignSelf: 'flex-end', gap: '0.5rem' }}><Send size={16} /> Gửi Bình Luận</button>
+                </form>
+              ) : <p style={{ marginBottom: '1rem', fontWeight: 'bold' }}>Vui lòng đăng nhập để tham gia bình luận.</p>}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {comments.map(cmt => (
+                  <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#3B2AA2' }}>
+                        {cmt.user_name || 'Người dùng ẩn danh'}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', color: '#6b7280', fontWeight: 'bold' }}>
+                        {formatDate(cmt.created_at)}
+                      </span>
+                    </div>
+                    <p style={{ fontWeight: '500', marginTop: '0.25rem' }}>{cmt.content}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentView === 'profile' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start' }}><ChevronLeft size={18} /> Quay Lại</button>
+            <div className="brutal-border brutal-shadow-purple" style={{ padding: '2.5rem', backgroundColor: '#39EFB2', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h1 className="font-title uppercase" style={{ fontSize: '2rem' }}>{profile?.display_name}</h1>
+                <p style={{ fontWeight: 'bold' }}>{user?.email}</p>
+              </div>
+              <button onClick={handleLogout} className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff' }}>Đăng Xuất</button>
+            </div>
+
+            <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
+              <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bài Hát Đã Thích ({savedSheetsList.length})</h2>
+              {savedSheetsList.map(sh => (
+                <div key={sh.id} className="brutal-btn brutal-border" style={{ width: '100%', padding: '0.5rem', backgroundColor: '#fff', justifyContent: 'space-between', marginBottom: '0.5rem' }} onClick={() => handlePlaySheet(sh)}>
+                  <span>{sh.title}</span> <Play size={16}/>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer style={{ marginTop: '5rem', borderTop: '4px solid #000', backgroundColor: '#3B2AA2', padding: '4rem 1rem', position: 'relative', overflow: 'hidden', color: '#fff' }}>
+        <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+            <div className="brutal-border brutal-shadow-yellow" style={{ width: '8rem', height: '8rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
+              <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div>
+              <h2 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#fff', color: '#000', padding: '0.5rem 1.25rem', fontSize: '2.25rem' }}>
+                Trương Phi Long
+              </h2>
+              <div style={{ marginTop: '0.25rem' }}>
+                <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.5rem 1rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                  Engineering & Architecture Undergraduate - HCMUT
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
