@@ -33,7 +33,6 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
 
-  // Lắng nghe trạng thái đăng nhập từ Supabase
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -130,4 +129,4 @@ export default function App() {
       `}</style>
       
       <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="font-title uppercase" style={{ fontSize
+        <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer'
