@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, Pause, Heart, Share2, 
   User, FileText, ChevronLeft, Volume2,
-  FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle, Calendar
+  FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle, Calendar,
+  ExternalLink, Coffee, Mail, Music, Video, Globe, Camera
 } from 'lucide-react';
 
 import { supabase } from './supabaseClient';
@@ -481,7 +482,6 @@ export default function App() {
                   <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <h3 className="font-title uppercase truncate" style={{ fontSize: '1.125rem' }}>{sheet.title}</h3>
                     
-                    {/* ĐÃ TÁCH XUỐNG DÒNG RÕ RÀNG */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#4b5563' }}>
                       <span className="uppercase">{sheet.genre}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -657,24 +657,65 @@ export default function App() {
         )}
       </main>
 
-      {/* FOOTER ĐÚNG CHUẨN BAN ĐẦU CỦA BẠN */}
+      {/* FOOTER ĐÃ TÍCH HỢP ĐẦY ĐỦ PROFILE GỐC + MẠNG XÃ HỘI + DONATE */}
       <footer style={{ marginTop: '5rem', borderTop: '4px solid #000', backgroundColor: '#3B2AA2', padding: '4rem 1rem', position: 'relative', overflow: 'hidden', color: '#fff' }}>
-        <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-            <div className="brutal-border brutal-shadow-yellow" style={{ width: '8rem', height: '8rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
-              <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <div>
-              <h2 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#fff', color: '#000', padding: '0.5rem 1.25rem', fontSize: '2.25rem' }}>
-                Trương Phi Long
-              </h2>
-              <div style={{ marginTop: '0.25rem' }}>
-                <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.5rem 1rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
-                  Engineering & Architecture Undergraduate - HCMUT
-                </p>
+        <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          
+          {/* PHẦN 1: PROFILE GỐC */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+              <div className="brutal-border brutal-shadow-yellow" style={{ width: '8rem', height: '8rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
+                <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div>
+                <h2 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#fff', color: '#000', padding: '0.5rem 1.25rem', fontSize: '2.25rem', marginBottom: '0.5rem' }}>
+                  Trương Phi Long
+                </h2>
+                <div>
+                  <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.5rem 1rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                    Engineering & Architecture Undergraduate - HCMUT
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* NÚT DONATE / ỦNG HỘ */}
+            <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#FACB54', color: '#000', display: 'flex', flexDirection: 'column', gap: '0.5rem', maxWidth: '320px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1rem' }}>
+                <Coffee size={20} /> Ủng Hộ Tác Giả (Donate)
+              </div>
+              <p style={{ fontSize: '0.85rem', fontWeight: '500', lineHeight: 1.4 }}>
+                MoMo / Chuyển khoản ngân hàng: <br/>
+                <strong>09xxxxxxxx (Trương Phi Long)</strong>
+              </p>
+            </div>
           </div>
+
+          {/* PHẦN 2: CÁC NÚT LIÊN KẾT MẠNG XÃ HỘI */}
+          <div style={{ borderTop: '2px dashed rgba(255,255,255,0.3)', paddingTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
+                <Camera size={16} /> Instagram
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
+                <Globe size={16} /> Facebook
+              </a>
+              <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
+                <Video size={16} /> TikTok
+              </a>
+              <a href="https://soundcloud.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
+                <Music size={16} /> SoundCloud
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none', gap: '0.4rem' }}>
+                <Play size={16} /> YouTube
+              </a>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.8)' }}>
+              © 2026 jang.logn18 music. All rights reserved.
+            </p>
+          </div>
+
         </div>
       </footer>
     </div>
