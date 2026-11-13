@@ -64,16 +64,24 @@ export default function App() {
     <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000', fontFamily: "'Space Grotesk', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
-        * { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
-        .brutal-border { border: 2px solid #000; }
-        .brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
-        .brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
-        .brutal-shadow-yellow { box-shadow: 4px 4px 0px 0px #FACB54; }
-        .brutal-btn { transition: all 0.1s ease-in-out; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
-        .brutal-btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px transparent !important; }
-        .uppercase { text-transform: uppercase; }
-        .grid { display: grid; gap: 1.5rem; }
-        .flex { display: flex; }
+
+/* KHAI BÁO PHÔNG CHỮ TÙY CHỈNH TỪ THƯ MỤC PUBLIC */
+@font-face {
+  font-family: 'BD StreetSigns';
+  src: url('/fonts/BDStreetSigns.ttf') format('truetype'); 
+  /* Nếu đuôi file của bạn là .otf thì đổi format thành 'opentype' */
+  font-weight: normal;
+  font-style: normal;
+}
+
+* { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
+.brutal-border { border: 2px solid #000; }
+
+/* Cập nhật lại class font-title */
+.font-title { 
+  font-family: 'BD StreetSigns', Impact, system-ui, sans-serif !important; 
+  font-weight: normal; 
+}
       `}</style>
       
       {/* HEADER */}
