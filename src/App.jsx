@@ -1,67 +1,22 @@
-import './App.css'
 import React, { useState, useEffect } from 'react';
 import { 
-  Play, Pause, Heart, Share2, Music, 
-  Upload, User, FileText, ChevronLeft, Volume2,
+  Play, Pause, Heart, Share2, 
+  User, FileText, ChevronLeft, Volume2,
   FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles
 } from 'lucide-react';
 
-// --- MOCK DATA (Tiếng Việt) ---
-const MOCK_STATS = {
-  totalHours: 124,
-  topSong: 'Nocturne Op. 9 No. 2',
-  totalSheets: 45,
-  streak: 12
-};
-
+const MOCK_STATS = { totalHours: 124, topSong: 'Nocturne Op. 9 No. 2', totalSheets: 45, streak: 12 };
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
-
 const MOCK_SHEETS = [
-  {
-    id: '1',
-    title: 'Nocturne Op. 9 No. 2',
-    artist: 'Frédéric Chopin',
-    genre: 'Classical',
-    cover: 'https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&q=80&w=400',
-  },
-  {
-    id: '2',
-    title: 'Gurenge (Demon Slayer)',
-    artist: 'LiSA (Piano Cover)',
-    genre: 'Anime',
-    cover: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=400',
-  },
-  {
-    id: '3',
-    title: 'Nơi Này Có Anh',
-    artist: 'Sơn Tùng M-TP',
-    genre: 'Nhạc Việt',
-    cover: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&q=80&w=400',
-  },
-  {
-    id: '4',
-    title: 'Interstellar Main Theme',
-    artist: 'Hans Zimmer',
-    genre: 'Soundtrack',
-    cover: 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&q=80&w=400',
-  }
+  { id: '1', title: 'Nocturne Op. 9 No. 2', artist: 'Frédéric Chopin', genre: 'Classical', cover: 'https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&q=80&w=400' },
+  { id: '2', title: 'Gurenge (Demon Slayer)', artist: 'LiSA (Piano Cover)', genre: 'Anime', cover: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=400' },
+  { id: '3', title: 'Nơi Này Có Anh', artist: 'Sơn Tùng M-TP', genre: 'Nhạc Việt', cover: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&q=80&w=400' },
+  { id: '4', title: 'Interstellar Main Theme', artist: 'Hans Zimmer', genre: 'Soundtrack', cover: 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&q=80&w=400' }
 ];
 
 const MOCK_POSTS = [
-  { 
-    id: '1', 
-    title: 'Hành trình chinh phục La Campanella', 
-    date: '24/10/2026', 
-    excerpt: 'Một vài kinh nghiệm và bài tập ngón giúp bạn vượt qua những đoạn nhảy quãng khó nhằn. Bắt đầu từ việc tập chậm...',
-    content: 'Nội dung chi tiết của bài viết sẽ nằm ở đây...\n\nLa Campanella là một trong những bản nhạc kinh điển đòi hỏi kỹ thuật nhảy quãng cực kỳ chuẩn xác. Để bắt đầu, bạn không nên nôn nóng đánh đúng tempo ngay lập tức.\n\nThứ nhất, hãy bắt đầu thật chậm, định hình rõ khoảng cách của quãng 8, quãng 10 trên phím đàn. Thứ hai, sự thả lỏng cổ tay là yếu tố quyết định để tay không bị mỏi khi chơi ở tốc độ cao.'
-  },
-  { 
-    id: '2', 
-    title: 'Tại sao mình thích dùng MuseScore hơn Sibelius?', 
-    date: '15/10/2026', 
-    excerpt: 'So sánh chi tiết 2 phần mềm viết nhạc phổ biến nhất hiện nay dựa trên trải nghiệm cá nhân...',
-    content: 'MuseScore hoàn toàn miễn phí và mã nguồn mở, đây là một điểm cộng rất lớn cho cộng đồng làm nhạc.\n\nTừ phiên bản 4.0, giao diện của MuseScore thực sự đã lột xác, mang lại cảm giác hiện đại, tối giản và chuyên nghiệp không kém gì các phần mềm trả phí hàng ngàn đô la. Hệ thống playback cũng được nâng cấp đáng kể với Muse Sounds, giúp các bản nhạc giao hưởng nghe chân thực hơn bao giờ hết.'
-  },
+  { id: '1', title: 'Hành trình chinh phục La Campanella', date: '24/10/2026', excerpt: 'Một vài kinh nghiệm và bài tập ngón giúp bạn vượt qua những đoạn nhảy quãng khó nhằn. Bắt đầu từ việc tập chậm...', content: 'La Campanella là một trong những bản nhạc kinh điển đòi hỏi kỹ thuật nhảy quãng cực kỳ chuẩn xác.\n\nThứ nhất, hãy bắt đầu thật chậm. Thứ hai, sự thả lỏng cổ tay là yếu tố quyết định.' },
+  { id: '2', title: 'Tại sao mình thích dùng MuseScore hơn Sibelius?', date: '15/10/2026', excerpt: 'So sánh chi tiết 2 phần mềm viết nhạc phổ biến nhất hiện nay dựa trên trải nghiệm cá nhân...', content: 'MuseScore hoàn toàn miễn phí và mã nguồn mở, đây là một điểm cộng rất lớn cho cộng đồng làm nhạc.\n\nTừ phiên bản 4.0, giao diện của MuseScore thực sự đã lột xác.' },
 ];
 
 const MOCK_COMMENTS = [
@@ -69,31 +24,7 @@ const MOCK_COMMENTS = [
   { id: 2, user: 'Linh Nguyễn', text: 'Cho mình hỏi đoạn tempo ở ô nhịp 32 đánh sao cho mượt ạ? Mình bị vấp hoài.', time: '5 giờ trước' }
 ];
 
-const BRUTALIST_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
-  
-  .font-space { font-family: 'Space Grotesk', sans-serif; }
-  .font-title { font-family: 'BD StreetSign Sans Standard', 'BD StreetSigns', Impact, system-ui, sans-serif; font-weight: normal; }
-  
-  .brutal-border { border: 2px solid #000; border-radius: 0px !important; }
-  .brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
-  .brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
-  .brutal-shadow-yellow { box-shadow: 4px 4px 0px 0px #FACB54; }
-  
-  .brutal-btn {
-    transition: all 0.1s ease-in-out;
-    cursor: pointer;
-  }
-  .brutal-btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0px 0px 0px 0px transparent !important;
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar { display: none; }
-  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-`;
-
-export default function PhiLongMusicApp() {
+export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentView, setCurrentView] = useState('home');
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -130,85 +61,70 @@ export default function PhiLongMusicApp() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black font-space selection:bg-[#39EFB2] pb-20">
-      <style>{BRUTALIST_STYLES}</style>
+    <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000', fontFamily: "'Space Grotesk', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+        * { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
+        .brutal-border { border: 2px solid #000; }
+        .brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
+        .brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
+        .brutal-shadow-yellow { box-shadow: 4px 4px 0px 0px #FACB54; }
+        .brutal-btn { transition: all 0.1s ease-in-out; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
+        .brutal-btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px transparent !important; }
+        .uppercase { text-transform: uppercase; }
+        .grid { display: grid; gap: 1.5rem; }
+        .flex { display: flex; }
+      `}</style>
       
       {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-white brutal-border border-x-0 border-t-0 px-4 md:px-6 py-4 flex justify-between items-center">
-        <div 
-          className="font-title text-2xl md:text-3xl cursor-pointer hover:bg-[#39EFB2] px-2 transition-colors brutal-border border-transparent hover:border-black"
-          onClick={() => setCurrentView('home')}
-        >
-          jang.logn18 music blog
+      <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', cursor: 'pointer', textTransform: 'uppercase' }} onClick={() => setCurrentView('home')}>
+          jang.logn18 music
         </div>
         
-        <div className="flex items-center gap-4">
-          {currentTrack && (
-            <div className="hidden md:flex items-center gap-3 brutal-border px-3 py-1 bg-white brutal-shadow-mint">
-              <button onClick={togglePlay} className="hover:text-[#3B2AA2]">
-                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-              </button>
-              <div className="flex flex-col w-32 cursor-pointer" onClick={() => setCurrentView('player')}>
-                <span className="text-xs font-bold truncate uppercase">{currentTrack.title}</span>
-                <div className="w-full h-1.5 bg-gray-200 brutal-border border-x-0 border-b-0 mt-1">
-                  <div className="h-full bg-[#FACB54] border-r-2 border-black transition-all duration-300" style={{ width: `${progress}%` }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {isLoggedIn ? (
-            <button
-              onClick={() => setCurrentView('profile')}
-              className="brutal-btn brutal-border px-4 py-1.5 bg-[#FACB54] text-black brutal-shadow-purple font-bold flex items-center gap-2 uppercase text-sm"
-            >
+            <button onClick={() => setCurrentView('profile')} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#FACB54', color: '#000', gap: '0.5rem' }}>
               <User size={16} /> Trương Phi Long
             </button>
           ) : (
-            <button 
-              onClick={() => setIsLoggedIn(true)}
-              className="brutal-btn brutal-border px-4 py-1.5 bg-[#3B2AA2] text-white brutal-shadow-mint font-bold flex items-center gap-2 uppercase text-sm"
-            >
+            <button onClick={() => setIsLoggedIn(true)} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#3B2AA2', color: '#fff', gap: '0.5rem' }}>
               <User size={16} /> Đăng nhập
             </button>
           )}
         </div>
       </header>
 
-      {/* MAIN */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      {/* MAIN CONTENT */}
+      <main style={{ maxWidth: '1152px', margin: '0 auto', padding: '2rem 1rem', paddingBottom: '5rem' }}>
         {currentView === 'home' && (
-          <div className="space-y-12">
-            <div className="flex justify-start">
-               <button className="brutal-btn brutal-border px-6 py-3 bg-[#FACB54] text-black brutal-shadow-mint font-title text-xl sm:text-2xl uppercase flex items-center gap-3 hover:bg-black hover:text-white transition-colors">
-                 <Sparkles size={28} /> Đề xuất bài hát
-               </button>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            
+            <button className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '1rem 2rem', backgroundColor: '#FACB54', fontSize: '1.25rem', alignSelf: 'flex-start', gap: '0.75rem' }}>
+              <Sparkles size={24} /> Đề xuất bài hát
+            </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-1 brutal-border p-5 bg-[#FACB54] brutal-shadow-purple">
-                <h2 className="font-title text-2xl uppercase border-b-2 border-black pb-2 mb-4">Dữ Liệu Nghe</h2>
-                <div className="space-y-3 font-medium">
-                  <p className="flex justify-between border-b-2 border-black/20 pb-1">
-                    <span>Tổng thời gian:</span> <span className="font-bold">{MOCK_STATS.totalHours} giờ</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
+                <h2 className="uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Dữ Liệu Nghe</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontWeight: '500' }}>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}>
+                    <span>Tổng thời gian:</span> <strong>{MOCK_STATS.totalHours} giờ</strong>
                   </p>
-                  <p className="flex justify-between border-b-2 border-black/20 pb-1">
-                    <span>Bài hát tuần:</span> <span className="font-bold truncate max-w-[120px]">{MOCK_STATS.topSong}</span>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}>
+                    <span>Chuỗi nghe:</span> <strong>{MOCK_STATS.streak} ngày</strong>
                   </p>
-                  <p className="flex justify-between border-b-2 border-black/20 pb-1">
-                    <span>Chuỗi nghe:</span> <span className="font-bold">{MOCK_STATS.streak} ngày</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span>Tổng sheet:</span> <span className="font-bold">{MOCK_STATS.totalSheets}</span>
+                  <p style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Tổng sheet:</span> <strong>{MOCK_STATS.totalSheets}</strong>
                   </p>
                 </div>
               </div>
 
-              <div className="md:col-span-2 brutal-border p-5 bg-white brutal-shadow-mint">
-                <h2 className="font-title text-2xl uppercase border-b-2 border-black pb-2 mb-4">Chủ Đề</h2>
-                <div className="flex flex-wrap gap-3">
+              <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.5rem', backgroundColor: '#fff' }}>
+                <h2 className="uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Chủ Đề</h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                   {MOCK_TOPICS.map((topic, idx) => (
-                    <button key={idx} className="brutal-btn brutal-border px-4 py-2 bg-white hover:bg-gray-100 font-bold uppercase text-sm">
+                    <button key={idx} className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', fontSize: '0.875rem' }}>
                       {topic}
                     </button>
                   ))}
@@ -217,292 +133,73 @@ export default function PhiLongMusicApp() {
             </div>
 
             <div>
-              <h2 className="font-title text-3xl uppercase mb-6 inline-block bg-[#39EFB2] px-3 py-1 brutal-border brutal-shadow-purple">
+              <h2 className="uppercase brutal-border brutal-shadow-purple" style={{ display: 'inline-block', backgroundColor: '#39EFB2', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
                 Bản Nhạc Mới
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
                 {MOCK_SHEETS.map(sheet => (
-                  <div key={sheet.id} className="brutal-border bg-white p-3 brutal-shadow-mint flex flex-col group transition-all">
-                    <div className="w-full aspect-square brutal-border overflow-hidden relative mb-3 bg-black">
-                      <img src={sheet.cover} alt={sheet.title} className="w-full h-full object-cover grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" />
-                      <div className="absolute top-2 right-2 bg-white text-black px-2 py-0.5 text-xs font-bold brutal-border uppercase">
-                        {sheet.genre}
-                      </div>
+                  <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
+                    <div className="brutal-border" style={{ width: '100%', aspectRatio: '1/1', backgroundColor: '#000', marginBottom: '1rem', position: 'relative', overflow: 'hidden' }}>
+                      <img src={sheet.cover} alt={sheet.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
-                    <h3 className="text-lg font-title uppercase mb-1 line-clamp-1" title={sheet.title}>{sheet.title}</h3>
-                    <p className="text-sm font-medium mb-4 uppercase text-gray-600 line-clamp-1">{sheet.artist}</p>
-                    <button 
-                      onClick={() => handlePlaySheet(sheet)}
-                      className="mt-auto w-full brutal-btn brutal-border py-2 bg-white hover:bg-[#39EFB2] font-bold flex items-center justify-center gap-2 uppercase text-sm"
-                    >
-                      <Play size={16} /> Nghe & Xem Sheet
+                    <h3 className="uppercase" style={{ fontSize: '1.125rem', marginBottom: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sheet.title}</h3>
+                    <p className="uppercase" style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '1rem' }}>{sheet.artist}</p>
+                    <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', gap: '0.5rem', width: '100%' }}>
+                      <Play size={16} /> Nghe & Xem
                     </button>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="font-title text-3xl uppercase mb-6 inline-block bg-[#3B2AA2] text-white px-3 py-1 brutal-border brutal-shadow-yellow">
-                Bài Viết (Blog)
-              </h2>
-              <div className="flex flex-col gap-4">
-                {MOCK_POSTS.map(post => (
-                  <div key={post.id} className="brutal-border bg-white p-4 sm:p-5 brutal-shadow-mint hover:bg-[#FACB54] transition-colors flex flex-col md:flex-row gap-4 items-start md:items-center justify-between group">
-                    <div className="flex-1">
-                      <h3 className="text-xl sm:text-2xl font-title uppercase mb-1">{post.title}</h3>
-                      <div className="text-sm font-bold text-gray-600 mb-3 border-b-2 border-black inline-block pb-1">
-                        {post.date}
-                      </div>
-                      <p className="text-sm text-gray-800 line-clamp-2">{post.excerpt}</p>
-                    </div>
-                    <button 
-                      onClick={() => handleReadPost(post)}
-                      className="brutal-btn brutal-border bg-white px-6 py-2 font-bold uppercase text-sm brutal-shadow-purple shrink-0 mt-2 md:mt-0"
-                    >
-                      Đọc
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {currentView === 'post' && currentPost && (
-          <div className="space-y-6 max-w-4xl mx-auto">
-            <button 
-              onClick={() => setCurrentView('home')}
-              className="brutal-btn brutal-border px-4 py-2 bg-white brutal-shadow-mint font-bold flex items-center gap-2 uppercase text-sm mb-6"
-            >
-              <ChevronLeft size={18} /> Quay Lại
-            </button>
-            <div className="brutal-border bg-white p-6 sm:p-10 brutal-shadow-yellow">
-              <h1 className="font-title text-3xl sm:text-5xl uppercase leading-tight mb-4">{currentPost.title}</h1>
-              <div className="font-bold text-gray-600 mb-8 pb-4 border-b-4 border-black inline-block uppercase">
-                Đăng ngày: {currentPost.date}
-              </div>
-              <div className="space-y-4 text-lg leading-relaxed whitespace-pre-line font-medium text-gray-900">
-                {currentPost.content}
               </div>
             </div>
           </div>
         )}
 
         {currentView === 'player' && currentTrack && (
-          <div className="flex flex-col">
-            <div className="sticky top-[73px] z-40 bg-white py-4 mb-8 border-b-4 border-black brutal-shadow-mint space-y-4 px-2 -mx-2 sm:mx-0 sm:px-4 mt-2">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <button 
-                  onClick={() => setCurrentView('home')}
-                  className="brutal-btn brutal-border px-4 py-2 bg-[#39EFB2] brutal-shadow-purple font-bold flex items-center gap-2 uppercase text-sm shrink-0"
-                >
-                  <ChevronLeft size={18} /> Quay Lại
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', alignSelf: 'flex-start', gap: '0.5rem' }}>
+              <ChevronLeft size={18} /> Quay Lại
+            </button>
+
+            <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.5rem', backgroundColor: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h1 className="uppercase" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>{currentTrack.title}</h1>
+                <p className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563' }}>{currentTrack.artist}</p>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '3rem', height: '3rem', backgroundColor: '#3B2AA2', color: '#fff' }}>
+                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                 </button>
-                <div className="flex-1 text-left sm:text-right overflow-hidden w-full">
-                  <h1 className="font-title text-2xl sm:text-4xl uppercase leading-none mb-1 truncate">{currentTrack.title}</h1>
-                  <p className="font-bold text-gray-600 uppercase text-sm truncate">{currentTrack.artist}</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1 brutal-border bg-white p-3 brutal-shadow-yellow flex flex-col justify-center">
-                  <div className="flex items-center gap-4">
-                    <button 
-                      onClick={togglePlay}
-                      className="brutal-btn brutal-border w-10 h-10 flex items-center justify-center bg-[#3B2AA2] text-white hover:bg-[#FACB54] hover:text-black shrink-0"
-                    >
-                      {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-                    </button>
-                    <div className="flex-1">
-                      <div className="w-full h-3 brutal-border bg-gray-100 cursor-pointer relative overflow-hidden">
-                        <div className="absolute top-0 left-0 h-full bg-[#39EFB2] border-r-2 border-black transition-all duration-300" style={{ width: `${progress}%` }}></div>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-bold mt-1 uppercase">
-                        <span>0:{progress < 10 ? `0${progress}` : progress}</span>
-                        <span>3:45</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap lg:flex-nowrap items-stretch gap-3 shrink-0">
-                  <div className="flex gap-3">
-                    <button className="brutal-btn brutal-border p-2 px-3 bg-white hover:bg-[#fc88a1] brutal-shadow-purple text-black flex items-center justify-center">
-                      <Heart size={18} />
-                    </button>
-                    <button className="brutal-btn brutal-border p-2 px-3 bg-white hover:bg-gray-100 brutal-shadow-purple text-black flex items-center justify-center">
-                      <Share2 size={18} />
-                    </button>
-                  </div>
-                  <div className="flex gap-3 flex-wrap sm:flex-nowrap">
-                    <button className="brutal-btn brutal-border px-3 py-2 bg-[#3B2AA2] text-white hover:text-black hover:bg-white brutal-shadow-mint font-bold uppercase flex items-center gap-2 text-xs">
-                      <FileDown size={14} /> PDF
-                    </button>
-                    <button className="brutal-btn brutal-border px-3 py-2 bg-[#FACB54] hover:bg-white brutal-shadow-purple font-bold uppercase flex items-center gap-2 text-xs">
-                      <Disc size={14} /> MIDI
-                    </button>
-                    <button className="brutal-btn brutal-border px-3 py-2 bg-[#39EFB2] hover:bg-white brutal-shadow-yellow font-bold uppercase flex items-center gap-2 text-xs">
-                      <FileAudio size={14} /> MP3
-                    </button>
-                  </div>
+                <div style={{ width: '150px', height: '0.75rem', backgroundColor: '#f3f4f6', border: '2px solid #000', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', backgroundColor: '#39EFB2', width: `${progress}%`, borderRight: '2px solid #000', transition: 'width 0.3s' }}></div>
                 </div>
               </div>
             </div>
 
-            <div className="w-full aspect-[1/1.4] md:aspect-[3/4] brutal-border bg-gray-50 brutal-shadow-purple flex flex-col items-center justify-center relative overflow-hidden mb-12">
-              <FileText size={64} strokeWidth={1} className="text-gray-300 mb-4" />
-              <p className="font-title text-xl text-gray-400 uppercase text-center px-4">
-                Khu vực hiển thị Sheet Music / PDF
-              </p>
-            </div>
-
-            <div className="brutal-border bg-white p-6 brutal-shadow-yellow mt-4">
-              <h2 className="font-title text-2xl uppercase border-b-2 border-black pb-2 mb-6 flex items-center gap-2">
-                <MessageSquare size={24} /> Bình Luận
-              </h2>
-              <div className="mb-8">
-                {isLoggedIn ? (
-                  <div className="flex flex-col gap-3">
-                    <textarea 
-                      className="w-full brutal-border p-3 font-medium focus:outline-none resize-y min-h-[100px]" 
-                      placeholder="Nhập bình luận của bạn..."
-                    ></textarea>
-                    <button className="brutal-btn brutal-border px-6 py-2 bg-[#39EFB2] hover:bg-[#3B2AA2] hover:text-white brutal-shadow-mint font-bold uppercase self-end flex items-center gap-2">
-                      <Send size={16} /> Gửi Bình Luận
-                    </button>
-                  </div>
-                ) : (
-                  <div className="brutal-border bg-gray-100 p-6 text-center">
-                    <p className="font-bold text-gray-600 mb-4 uppercase text-lg">Vui lòng đăng nhập để bình luận</p>
-                    <button 
-                      onClick={() => setIsLoggedIn(true)}
-                      className="brutal-btn brutal-border px-6 py-3 bg-[#3B2AA2] text-white hover:bg-white hover:text-black brutal-shadow-mint font-bold uppercase inline-flex items-center gap-2"
-                    >
-                      <User size={18} /> Đăng Nhập Ngay
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                {MOCK_COMMENTS.map(cmt => (
-                  <div key={cmt.id} className="brutal-border bg-gray-50 p-4">
-                    <div className="flex justify-between items-center mb-2 border-b-2 border-black/10 pb-2">
-                      <span className="font-bold uppercase text-sm">{cmt.user}</span>
-                      <span className="text-xs font-bold text-gray-500">{cmt.time}</span>
-                    </div>
-                    <p className="font-medium text-gray-800">{cmt.text}</p>
-                  </div>
-                ))}
-              </div>
+            <div className="brutal-border brutal-shadow-purple" style={{ width: '100%', height: '500px', backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+              <FileText size={64} color="#d1d5db" />
+              <p className="uppercase" style={{ color: '#9ca3af', fontWeight: 'bold' }}>Khu vực hiển thị Sheet Music</p>
             </div>
           </div>
         )}
 
         {currentView === 'profile' && (
-          <div className="space-y-8 max-w-4xl mx-auto">
-            <button 
-              onClick={() => setCurrentView('home')}
-              className="brutal-btn brutal-border px-4 py-2 bg-white brutal-shadow-mint font-bold flex items-center gap-2 uppercase text-sm mb-2"
-            >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start', gap: '0.5rem' }}>
               <ChevronLeft size={18} /> Quay Lại
             </button>
-            <div className="brutal-border bg-[#39EFB2] p-6 sm:p-10 brutal-shadow-purple flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', backgroundColor: '#39EFB2', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h1 className="font-title text-4xl uppercase">Trương Phi Long</h1>
-                <p className="font-bold uppercase mt-2">Người nghe (jang.logn18)</p>
+                <h1 className="uppercase" style={{ fontSize: '2.5rem' }}>Trương Phi Long</h1>
+                <p className="uppercase" style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>Người nghe (jang.logn18)</p>
               </div>
-              <button 
-                onClick={() => {
-                  setIsLoggedIn(false);
-                  setCurrentView('home');
-                }}
-                className="brutal-btn brutal-border px-6 py-2 bg-white hover:bg-gray-100 brutal-shadow-yellow font-bold uppercase text-sm"
-              >
+              <button onClick={() => { setIsLoggedIn(false); setCurrentView('home'); }} className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff' }}>
                 Đăng Xuất
               </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="brutal-border bg-white p-6 brutal-shadow-mint">
-                <h2 className="font-title text-2xl uppercase border-b-2 border-black pb-2 mb-4">Dữ Liệu Nghe</h2>
-                <div className="space-y-3 font-medium">
-                  <p className="flex justify-between border-b-2 border-black/20 pb-1">
-                    <span>Tổng thời gian:</span> <span className="font-bold">25 giờ</span>
-                  </p>
-                  <p className="flex justify-between border-b-2 border-black/20 pb-1">
-                    <span>Bài hát hay nghe:</span> <span className="font-bold truncate max-w-[120px]">Gurenge</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span>Sheet đã tải:</span> <span className="font-bold">14</span>
-                  </p>
-                </div>
-              </div>
-              <div className="brutal-border bg-[#FACB54] p-6 brutal-shadow-purple">
-                <h2 className="font-title text-2xl uppercase border-b-2 border-black pb-2 mb-4">Bài Hát Đã Lưu</h2>
-                <ul className="space-y-2 font-bold uppercase text-sm">
-                  <li className="brutal-border bg-white p-2 flex justify-between items-center brutal-btn hover:bg-[#39EFB2]" onClick={() => handlePlaySheet(MOCK_SHEETS[0])}>
-                    <span>Nocturne Op. 9 No. 2</span> <Play size={16}/>
-                  </li>
-                  <li className="brutal-border bg-white p-2 flex justify-between items-center brutal-btn hover:bg-[#39EFB2]" onClick={() => handlePlaySheet(MOCK_SHEETS[3])}>
-                    <span>Interstellar Main Theme</span> <Play size={16}/>
-                  </li>
-                </ul>
-              </div>
             </div>
           </div>
         )}
       </main>
-
-      {/* FOOTER */}
-      <footer className="mt-20 border-t-4 border-black bg-[#3B2AA2] py-16 px-4 md:px-8 relative overflow-hidden text-white">
-        <div className="max-w-6xl mx-auto flex flex-col items-start text-left space-y-6 relative z-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-8 w-full">
-            <div className="w-32 h-32 bg-[#39EFB2] brutal-border brutal-shadow-yellow relative overflow-hidden p-0 shrink-0">
-              <img 
-                src="1794575745034.jpg" 
-                alt="Trương Phi Long" 
-                className="w-full h-full object-cover brutal-border border-0" 
-              />
-            </div>
-            <div className="flex flex-col items-start gap-2">
-              <h2 className="font-title text-3xl md:text-5xl uppercase bg-white text-black brutal-border inline-block px-5 py-2 brutal-shadow-mint">
-                Trương Phi Long
-              </h2>
-              <p className="font-bold text-sm sm:text-base bg-black text-white px-4 py-2 brutal-border inline-block max-w-2xl mt-1">
-                [Tiểu sử sẽ được cập nhật sau...]
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-start gap-4 mt-2">
-            {['Facebook', 'Instagram', 'YouTube', 'SoundCloud', 'TikTok'].map(social => (
-              <button 
-                key={social} 
-                className="brutal-btn px-4 h-12 brutal-border bg-white text-black hover:bg-[#FACB54] hover:text-black brutal-shadow-mint flex items-center justify-center font-bold text-sm uppercase"
-              >
-                {social}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-8 border-t-4 border-white/20 pt-8 w-full max-w-2xl">
-            <h3 className="font-title text-2xl uppercase bg-[#FACB54] text-black brutal-border inline-block px-4 py-2 brutal-shadow-mint mb-5">
-              Donate / Ủng hộ
-            </h3>
-            <div className="flex flex-col sm:flex-row gap-4 font-bold text-sm sm:text-base">
-              <div className="bg-white text-black px-4 py-3 brutal-border brutal-shadow-purple flex-1">
-                <span className="text-[#3B2AA2] uppercase block mb-1">VCB Digibank</span> 
-                1012345678<br/>TRUONG PHI LONG
-              </div>
-              <div className="bg-white text-black px-4 py-3 brutal-border brutal-shadow-mint flex-1">
-                <span className="text-[#a50064] uppercase block mb-1">MoMo</span> 
-                0987654321<br/>TRUONG PHI LONG
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
