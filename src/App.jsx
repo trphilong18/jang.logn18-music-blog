@@ -5,26 +5,6 @@ import {
   FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles
 } from 'lucide-react';
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
-
-/* KHAI BÁO PHÔNG CHỮ TÙY CHỈNH TỪ THƯ MỤC PUBLIC */
-@font-face {
-  font-family: 'BD StreetSigns';
-  src: url('/fonts/BDStreetSigns.ttf') format('truetype'); 
-  /* Nếu đuôi file của bạn là .otf thì đổi format thành 'opentype' */
-  font-weight: normal;
-  font-style: normal;
-}
-
-* { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
-.brutal-border { border: 2px solid #000; }
-
-/* Cập nhật lại class font-title */
-.font-title { 
-  font-family: 'BD StreetSigns', Impact, system-ui, sans-serif !important; 
-  font-weight: normal; 
-}
-
 const MOCK_STATS = { totalHours: 124, topSong: 'Nocturne Op. 9 No. 2', totalSheets: 45, streak: 12 };
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
 const MOCK_SHEETS = [
