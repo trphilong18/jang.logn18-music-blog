@@ -5,6 +5,113 @@ import {
   FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles
 } from 'lucide-react';
 
+import { supabase } from './supabaseClient';
+
+// Hàm xử lý đăng nhập Google
+const handleLogin = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+  });
+  if (error) alert(error.message);
+};
+
+// Hàm đăng xuất
+const handleLogout = async () => {
+  await supabase.auth.signOut();
+  setIsLoggedIn(false);
+};
+
+const [searchTerm, setSearchTerm] = useState('');
+const [selectedGenre, setSelectedGenre] = useState('All');
+
+// Lọc danh sách sheet nhạc dựa trên từ khóa và dòng nhạc (genre)
+const filteredSheets = MOCK_SHEETS.filter(sheet => {
+  const matchesSearch = sheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        sheet.artist.toLowerCase().includes(searchTerm.toLowerCase());
+  const matchesGenre = selectedGenre === 'All' || sheet.genre === selectedGenre;
+  return matchesSearch && matchesGenre;
+});
+
+<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+  {/* Ô nhập từ khóa tìm kiếm */}
+  <input 
+    type="text" 
+    placeholder="Tìm kiếm bài hát, nghệ sĩ..." 
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="brutal-border"
+    style={{ padding: '0.75rem 1rem', fontSize: '1rem', width: '100%', fontWeight: 'bold' }}
+  />
+
+  {/* Bộ lọc Dòng nhạc (Filters) */}
+  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+    <button 
+      onClick={() => setSelectedGenre('All')}
+      className="brutal-btn brutal-border uppercase"
+      style={{ padding: '0.5rem 1rem', backgroundColor: selectedGenre === 'All' ? '#39EFB2' : '#fff' }}
+    >
+      Tất cả
+    </button>
+    {MOCK_TOPICS.map((topic, idx) => (
+      <button 
+        key={idx} 
+        onClick={() => setSelectedGenre(topic)}
+        className="brutal-btn brutal-border uppercase"
+        style={{ padding: '0.5rem 1rem', backgroundColor: selectedGenre === topic ? '#39EFB2' : '#fff', fontSize: '0.875rem' }}
+      >
+        {topic}
+      </button>
+    ))}
+  </div>
+</div>
+
+const [uploadData, setUploadData] = useState({ title: '', artist: '', genre: 'Classical' });
+const [file, setFile] = useState(null);
+
+const handleUpload = async (e) => {
+  e.preventDefault();
+  if (!file) return alert('Vui lòng chọn file sheet!');
+
+  // 1. Tải file lên Supabase Storage (bạn tạo sẵn một bucket tên là 'sheets-storage')
+  const fileName = `${Date.now()}_${file.name}`;
+  const { data: fileData, error: fileError } = await supabase.storage
+    .from('sheets-storage')
+    .upload(fileName, file);
+
+  if (fileError) return alert('Lỗi tải file: ' + fileError.message);
+
+  // Lấy Public URL của file vừa tải lên
+  const { data: { publicUrl } } = supabase.storage
+    .from('sheets-storage')
+    .getPublicUrl(fileName);
+
+  // 2. Lưu thông tin bài hát vào bảng `sheets` trên Database
+  const { error: dbError } = await supabase.from('sheets').insert([
+    { 
+      title: uploadData.title, 
+      artist: uploadData.artist, 
+      genre: uploadData.genre,
+      file_url: publicUrl,
+      cover: 'https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&q=80&w=400' 
+    }
+  ]);
+
+  if (dbError) alert('Lỗi lưu database: ' + dbError.message);
+  else {
+    alert('Tải lên thành công!');
+    // Reset form hoặc chuyển về trang chủ
+  }
+};
+
+const handleSendComment = async (text, sheetId) => {
+  const { error } = await supabase.from('comments').insert([
+    { sheet_id: sheetId, user_name: 'Trương Phi Long', text: text }
+  ]);
+  if (!error) {
+    // Tải lại danh sách bình luận cho bài hát này
+  }
+};
+
 const MOCK_STATS = { totalHours: 124, topSong: 'Nocturne Op. 9 No. 2', totalSheets: 45, streak: 12 };
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
 const MOCK_SHEETS = [
