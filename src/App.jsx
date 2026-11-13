@@ -129,4 +129,99 @@ export default function App() {
       `}</style>
       
       <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer'
+        <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => setCurrentView('home')}>
+          jang.logn18 music
+        </div>
+        
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {isLoggedIn ? (
+            <button onClick={() => setCurrentView('profile')} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#FACB54', color: '#000', gap: '0.5rem' }}>
+              <User size={16} /> {user?.user_metadata?.full_name || 'Trương Phi Long'}
+            </button>
+          ) : (
+            <button onClick={handleLogin} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#3B2AA2', color: '#fff', gap: '0.5rem' }}>
+              <User size={16} /> Đăng nhập
+            </button>
+          )}
+        </div>
+      </header>
+
+      <main style={{ maxWidth: '1152px', margin: '0 auto', padding: '2rem 1rem', paddingBottom: '5rem' }}>
+        {currentView === 'home' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <input 
+                type="text" 
+                placeholder="Tìm kiếm bài hát, nghệ sĩ..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="brutal-border"
+                style={{ padding: '0.75rem 1rem', fontSize: '1rem', width: '100%', fontWeight: 'bold', backgroundColor: '#fff' }}
+              />
+
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={() => setSelectedGenre('All')}
+                  className="brutal-btn brutal-border uppercase"
+                  style={{ padding: '0.5rem 1rem', backgroundColor: selectedGenre === 'All' ? '#39EFB2' : '#fff' }}
+                >
+                  Tất cả
+                </button>
+                {MOCK_TOPICS.map((topic, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setSelectedGenre(topic)}
+                    className="brutal-btn brutal-border uppercase"
+                    style={{ padding: '0.5rem 1rem', backgroundColor: selectedGenre === topic ? '#39EFB2' : '#fff', fontSize: '0.875rem' }}
+                  >
+                    {topic}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="font-title uppercase brutal-border brutal-shadow-purple" style={{ display: 'inline-block', backgroundColor: '#39EFB2', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
+                Bản Nhạc Mới ({filteredSheets.length})
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                {filteredSheets.map(sheet => (
+                  <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
+                    <div className="brutal-border" style={{ width: '100%', aspectRatio: '1/1', backgroundColor: '#000', marginBottom: '1rem', position: 'relative', overflow: 'hidden' }}>
+                      <img src={sheet.cover} alt={sheet.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div className="brutal-border font-title uppercase" style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', backgroundColor: '#fff', padding: '0.125rem 0.5rem', fontSize: '0.75rem' }}>
+                        {sheet.genre}
+                      </div>
+                    </div>
+                    <h3 className="font-title uppercase truncate" style={{ fontSize: '1.125rem', marginBottom: '0.25rem' }}>{sheet.title}</h3>
+                    <p className="uppercase truncate" style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '1rem' }}>{sheet.artist}</p>
+                    <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', gap: '0.5rem', width: '100%' }}>
+                      <Play size={16} /> Nghe & Xem Sheet
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentView === 'profile' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start', gap: '0.5rem' }}>
+              <ChevronLeft size={18} /> Quay Lại
+            </button>
+            <div className="brutal-border brutal-shadow-purple" style={{ padding: '2.5rem', backgroundColor: '#39EFB2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h1 className="font-title uppercase" style={{ fontSize: '2.5rem' }}>{user?.user_metadata?.full_name || 'Trương Phi Long'}</h1>
+                <p className="uppercase" style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>{user?.email || 'jang.logn18'}</p>
+              </div>
+              <button onClick={handleLogout} className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.5rem 1.5rem', backgroundColor: '#fff' }}>
+                Đăng Xuất
+              </button>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
