@@ -17,13 +17,12 @@ const MOCK_SHEETS = [
 ];
 
 const MOCK_POSTS = [
-  { id: '1', title: 'Hành trình chinh phục La Campanella', date: '24/10/2026', excerpt: 'Một vài kinh nghiệm và bài tập ngón giúp bạn vượt qua những đoạn nhảy quãng khó nhằn...', content: 'Nội dung chi tiết của bài viết...' },
-  { id: '2', title: 'Tại sao mình thích dùng MuseScore hơn Sibelius?', date: '15/10/2026', excerpt: 'So sánh chi tiết 2 phần mềm viết nhạc phổ biến nhất hiện nay...', content: 'MuseScore hoàn toàn miễn phí...' },
+  { id: '1', title: 'Hành trình chinh phục La Campanella', date: '24/10/2026', excerpt: 'Kinh nghiệm vượt qua những đoạn nhảy quãng khó nhằn...', content: 'Nội dung chi tiết...' },
+  { id: '2', title: 'Tại sao mình thích dùng MuseScore hơn Sibelius?', date: '15/10/2026', excerpt: 'So sánh chi tiết 2 phần mềm viết nhạc...', content: 'MuseScore hoàn toàn miễn phí...' },
 ];
 
 const MOCK_COMMENTS = [
-  { id: 1, user: 'Hoàng Trần', text: 'Bản sheet này rất chi tiết, cảm ơn bạn nhiều nhé!', time: '2 giờ trước' },
-  { id: 2, user: 'Linh Nguyễn', text: 'Cho mình hỏi đoạn tempo ô nhịp 32 đánh sao cho mượt ạ?', time: '5 giờ trước' }
+  { id: 1, user: 'Hoàng Trần', text: 'Bản sheet này rất chi tiết, cảm ơn bạn!', time: '2 giờ trước' }
 ];
 
 export default function App() {
@@ -34,13 +33,8 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // States cho Tìm kiếm và Lọc
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
-
-  // States cho Upload
-  const [uploadData, setUploadData] = useState({ title: '', artist: '', genre: 'Classical' });
-  const [file, setFile] = useState(null);
 
   useEffect(() => {
     let interval;
@@ -52,40 +46,17 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  // Xử lý Đăng nhập Google qua Supabase
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
     if (error) alert(error.message);
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsLoggedIn(false);
-  };
-
-  // Lọc danh sách sheet nhạc
   const filteredSheets = MOCK_SHEETS.filter(sheet => {
     const matchesSearch = sheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           sheet.artist.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGenre = selectedGenre === 'All' || sheet.genre === selectedGenre;
     return matchesSearch && matchesGenre;
   });
-
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    if (!file) return alert('Vui lòng chọn file sheet!');
-    const fileName = `${Date.now()}_${file.name}`;
-    const { error: fileError } = await supabase.storage.from('sheets-storage').upload(fileName, file);
-    if (fileError) return alert('Lỗi tải file: ' + fileError.message);
-
-    const { data: { publicUrl } } = supabase.storage.from('sheets-storage').getPublicUrl(fileName);
-    const { error: dbError } = await supabase.from('sheets').insert([
-      { title: uploadData.title, artist: uploadData.artist, genre: uploadData.genre, file_url: publicUrl, cover: 'https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&q=80&w=400' }
-    ]);
-
-    if (dbError) alert('Lỗi lưu database: ' + dbError.message);
-    else alert('Tải lên thành công!');
-  };
 
   const handlePlaySheet = (sheet) => {
     setCurrentTrack(sheet);
@@ -130,51 +101,7 @@ export default function App() {
         .brutal-btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px transparent !important; }
         .uppercase { text-transform: uppercase; }
         .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
       
-      {/* HEADER */}
       <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => setCurrentView('home')}>
-          jang.logn18 music
-        </div>
-        
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          {isLoggedIn ? (
-            <button onClick={() => setCurrentView('profile')} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#FACB54', color: '#000', gap: '0.5rem' }}>
-              <User size={16} /> Trương Phi Long
-            </button>
-          ) : (
-            <button onClick={handleLogin} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#3B2AA2', color: '#fff', gap: '0.5rem' }}>
-              <User size={16} /> Đăng nhập
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* MAIN CONTENT */}
-      <main style={{ maxWidth: '1152px', margin: '0 auto', padding: '2rem 1rem', paddingBottom: '5rem' }}>
-        
-        {currentView === 'home' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            
-            {/* THANH TÌM KIẾM & BỘ LỌC */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <input 
-                type="text" 
-                placeholder="Tìm kiếm bài hát, nghệ sĩ..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="brutal-border"
-                style={{ padding: '0.75rem 1rem', fontSize: '1rem', width: '100%', fontWeight: 'bold', backgroundColor: '#fff' }}
-              />
-
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button 
-                  onClick={() => setSelectedGenre('All')}
-                  className="brutal-btn brutal-border uppercase"
-                  style={{ padding: '0.5rem 1rem', backgroundColor: selectedGenre === 'All' ? '#39EFB2' : '#fff' }}
-                >
-                  Tất cả
-                </button>
-                {MOCK_TOPICS.map((topic, idx) => (
+        <div className="font-title
