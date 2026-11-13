@@ -17,7 +17,7 @@ export default function App() {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [currentPost, setCurrentPost] = useState(null);
   
-  // Trạng thái phát nhạc & Thanh tiến trình tùy chỉnh
+  // Trạng thái phát nhạc & Thanh tiến trình
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -158,6 +158,7 @@ export default function App() {
     if (currentTrack?.id !== sheet.id) {
       setCurrentTrack(sheet);
       setIsPlaying(false);
+      setCurrentTime(0);
     }
     setCurrentView('player');
     window.scrollTo(0, 0);
@@ -184,8 +185,14 @@ export default function App() {
     }
   };
 
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration || 0);
+    }
+  };
+
   const handleSeek = (e) => {
-    const newTime = e.target.value;
+    const newTime = parseFloat(e.target.value);
     setCurrentTime(newTime);
     if (audioRef.current) {
       audioRef.current.currentTime = newTime;
@@ -328,6 +335,7 @@ export default function App() {
           ref={audioRef} 
           src={currentTrack.audio_url} 
           onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
           onEnded={() => setIsPlaying(false)}
         />
       )}
@@ -502,7 +510,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PLAYER CHI TIẾT (CUSTOM UI HOÀN CHỈNH, ĐỒNG BỘ THANH TIẾN TRÌNH) */}
+        {/* PLAYER CHI TIẾT */}
         {currentView === 'player' && currentTrack && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', backgroundColor: '#fff' }}>
@@ -525,7 +533,7 @@ export default function App() {
               <p className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '0.95rem', marginBottom: '1rem' }}>Thể loại: {currentTrack.genre}</p>
               {currentTrack.description && <p style={{ fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', marginBottom: '1.5rem', lineHeight: 1.6 }}>{currentTrack.description}</p>}
               
-              {/* TRÌNH ĐIỀU KHIỂN AUDIO CUSTOM BRUTALIST (THANH TIẾN TRÌNH HOẠT ĐỘNG CHUẨN) */}
+              {/* TRÌNH ĐIỀU KHIỂN AUDIO CUSTOM BRUTALIST */}
               {currentTrack.audio_url ? (
                 <div className="brutal-border" style={{ padding: '1.25rem', backgroundColor: '#f3f4f6', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -574,7 +582,7 @@ export default function App() {
               </div>
             )}
 
-            {/* BÌNH LUẬN (ĐÃ FIX HIỆN TÊN NGƯỜI DÙNG) */}
+            {/* BÌNH LUẬN */}
             <div className="brutal-border brutal-shadow-yellow" style={{ padding: '1.5rem', backgroundColor: '#fff' }}>
               <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bình Luận ({comments.length})</h2>
               {isLoggedIn ? (
