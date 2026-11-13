@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, Pause, Heart, Share2, 
   User, FileText, ChevronLeft, Volume2,
@@ -16,8 +16,10 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [currentTrack, setCurrentTrack] = useState(null);
   const [currentPost, setCurrentPost] = useState(null);
+  
+  // Trạng thái phát nhạc toàn cục (tránh xung đột nhiều nguồn)
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const audioRef = useRef(null);
 
   const [sheets, setSheets] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -75,6 +77,17 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Điều khiển thẻ audio toàn cục khi isPlaying hoặc currentTrack thay đổi
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.play().catch(e => console.log("Audio play blocked:", e));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying, currentTrack]);
+
   const fetchProfile = async (userId) => {
     let { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (error || !data) {
@@ -120,6 +133,8 @@ export default function App() {
     await supabase.auth.signOut();
     setIsLoggedIn(false);
     setUser(null);
+    setIsPlaying(false);
+    setCurrentTrack(null);
     setCurrentView('home');
   };
 
@@ -132,10 +147,12 @@ export default function App() {
   });
 
   const handlePlaySheet = (sheet) => {
-    setCurrentTrack(sheet);
+    if (currentTrack?.id !== sheet.id) {
+      setCurrentTrack(sheet);
+      setIsPlaying(false); // Mở ra phải bấm play mới phát, không tự động phát
+    }
     setCurrentView('player');
     window.scrollTo(0, 0);
-    setIsPlaying(true);
     fetchComments(sheet.id);
   };
 
@@ -146,7 +163,10 @@ export default function App() {
   };
 
   const togglePlay = () => {
-    if (currentTrack) setIsPlaying(!isPlaying);
+    if (!currentTrack && sheets.length > 0) {
+      setCurrentTrack(sheets[0]);
+    }
+    setIsPlaying(!isPlaying);
   };
 
   const handleShare = () => {
@@ -272,22 +292,35 @@ export default function App() {
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
       
-      {/* HEADER TÍCH HỢP PLAYER MINI TRÊN MENUBAR */}
+      {/* THẺ AUDIO TOÀN CỤC ĐƯỢC QUẢN LÝ DUY NHẤT TẠI ĐÂY (TRÁNH XUNG ĐỘT) */}
+      {currentTrack?.audio_url && (
+        <audio 
+          ref={audioRef} 
+          src={currentTrack.audio_url} 
+          onEnded={() => setIsPlaying(false)}
+        />
+      )}
+
+      {/* HEADER & MINI PLAYER TRÊN MENUBAR */}
       <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => setCurrentView('home')}>
           jang.logn18 music
         </div>
 
-        {/* PLAYER TRÊN MENUBAR */}
+        {/* MINI PLAYER TRÊN MENUBAR */}
         {currentTrack && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: '#f3f4f6', padding: '0.25rem 0.75rem', border: '2px solid #000' }}>
+          <div className="brutal-border" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: '#FACB54', padding: '0.35rem 1rem', boxShadow: '2px 2px 0px #000' }}>
             <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '2rem', height: '2rem', backgroundColor: '#3B2AA2', color: '#fff' }}>
               {isPlaying ? <Pause size={14} /> : <Play size={14} />}
             </button>
-            <div className="truncate" style={{ maxWidth: '150px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+            <div className="truncate" style={{ maxWidth: '180px', fontSize: '0.85rem', fontWeight: 'bold' }}>
               {currentTrack.title}
             </div>
-            {currentTrack.audio_url && <audio src={currentTrack.audio_url} autoPlay={isPlaying} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />}
+            {currentView !== 'player' && (
+              <button onClick={() => setCurrentView('player')} className="brutal-btn brutal-border uppercase" style={{ padding: '0.2rem 0.5rem', backgroundColor: '#fff', fontSize: '0.75rem' }}>
+                Xem
+              </button>
+            )}
           </div>
         )}
         
@@ -438,35 +471,53 @@ export default function App() {
           </div>
         )}
 
-        {/* PLAYER CHI TIẾT */}
+        {/* PLAYER CHI TIẾT (ĐÃ REDESIGN LẠI GỌN GÀNG, SANG TRỌNG) */}
         {currentView === 'player' && currentTrack && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div className="brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#fff', borderBottom: '4px solid #000' }}>
-              <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', marginBottom: '1rem' }}>
-                <ChevronLeft size={18} /> Quay Lại
-              </button>
-              <h1 className="font-title uppercase" style={{ fontSize: '1.75rem' }}>{currentTrack.title}</h1>
-              {currentTrack.description && <p style={{ marginTop: '0.5rem', fontSize: '0.95rem', fontWeight: '500', color: '#4b5563', whiteSpace: 'pre-line' }}>{currentTrack.description}</p>}
+            <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', backgroundColor: '#fff' }}>
               
-              {/* TRÌNH PHÁT NHẠC AUDIO THỰC TẾ */}
-              {currentTrack.audio_url && (
-                <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                  <audio controls src={currentTrack.audio_url} style={{ width: '100%' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+                <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', gap: '0.5rem' }}>
+                  <ChevronLeft size={18} /> Quay Lại
+                </button>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button onClick={toggleLike} className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: isCurrentLiked ? '#ef4444' : '#fff', color: isCurrentLiked ? '#fff' : '#000', gap: '0.5rem' }}>
+                    <Heart size={16} fill={isCurrentLiked ? '#fff' : 'none'} /> {isCurrentLiked ? 'Đã Thích' : 'Thích'}
+                  </button>
+                  <button onClick={handleShare} className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', gap: '0.5rem' }}>
+                    <Share2 size={16} /> Chia Sẻ
+                  </button>
+                </div>
+              </div>
+
+              <h1 className="font-title uppercase" style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>{currentTrack.title}</h1>
+              <p className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '0.95rem', marginBottom: '1rem' }}>Thể loại: {currentTrack.genre}</p>
+              {currentTrack.description && <p style={{ fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', marginBottom: '1.5rem', lineHeight: 1.6 }}>{currentTrack.description}</p>}
+              
+              {/* TRÌNH ĐIỀU KHIỂN PHÁT NHẠC (AUDIO PLAYER STYLING) */}
+              {currentTrack.audio_url ? (
+                <div className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f3f4f6', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '3rem', height: '3rem', backgroundColor: '#3B2AA2', color: '#fff', flexShrink: 0 }}>
+                    {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                  </button>
+                  <div style={{ flex: 1 }}>
+                    <p className="uppercase" style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>Đang phát âm thanh trực tiếp</p>
+                    <audio controls src={currentTrack.audio_url} style={{ width: '100%', height: '35px' }} />
+                  </div>
+                </div>
+              ) : (
+                <div className="brutal-border" style={{ padding: '0.75rem', backgroundColor: '#fef3c7', marginBottom: '1.5rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                  ⚠️ Bài hát này chưa có file Audio MP3 đính kèm.
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                <button onClick={toggleLike} className="brutal-btn brutal-border" style={{ padding: '0.5rem', backgroundColor: isCurrentLiked ? '#ef4444' : '#fff', color: isCurrentLiked ? '#fff' : '#000' }}>
-                  <Heart size={18} fill={isCurrentLiked ? '#fff' : 'none'} /> Thích
-                </button>
-                <button onClick={handleShare} className="brutal-btn brutal-border" style={{ padding: '0.5rem' }}><Share2 size={18} /> Chia sẻ</button>
+              {/* CÁC NÚT TẢI VỀ */}
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '2px solid #000', paddingTop: '1.25rem' }}>
+                {currentTrack.pdf_url && <a href={currentTrack.pdf_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#3B2AA2', color: '#fff', textDecoration: 'none', gap: '0.5rem' }}><FileDown size={16} /> Tải PDF Sheet</a>}
+                {currentTrack.midi_url && <a href={currentTrack.midi_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#FACB54', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><Disc size={16} /> Tải File MIDI</a>}
+                {currentTrack.audio_url && <a href={currentTrack.audio_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#fff', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><FileAudio size={16} /> Tải Audio MP3</a>}
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                {currentTrack.pdf_url && <a href={currentTrack.pdf_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.75rem', backgroundColor: '#3B2AA2', color: '#fff', textDecoration: 'none' }}><FileDown size={14} /> PDF</a>}
-                {currentTrack.midi_url && <a href={currentTrack.midi_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.75rem', backgroundColor: '#FACB54', textDecoration: 'none' }}><Disc size={14} /> MIDI</a>}
-                {currentTrack.audio_url && <a href={currentTrack.audio_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.75rem', backgroundColor: '#39EFB2', textDecoration: 'none' }}><FileAudio size={14} /> Audio</a>}
-              </div>
             </div>
 
             {/* KHUNG HIỂN THỊ TRỰC QUAN FILE PDF */}
@@ -476,7 +527,7 @@ export default function App() {
               </div>
             ) : (
               <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#f9fafb' }}>
-                <p className="font-title uppercase" style={{ color: '#9ca3af' }}>Chưa có file PDF cho bản nhạc này</p>
+                <p className="font-title uppercase" style={{ color: '#9ca3af' }}>Chưa có file PDF xem trước cho bản nhạc này</p>
               </div>
             )}
 
@@ -485,15 +536,15 @@ export default function App() {
               <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bình Luận ({comments.length})</h2>
               {isLoggedIn ? (
                 <form onSubmit={handleAddComment} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                  <textarea value={newCommentText} onChange={e => setNewCommentText(e.target.value)} className="brutal-border" style={{ padding: '0.75rem', minHeight: '80px' }} placeholder="Nhập bình luận..."></textarea>
-                  <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', alignSelf: 'flex-end' }}><Send size={16} /> Gửi</button>
+                  <textarea value={newCommentText} onChange={e => setNewCommentText(e.target.value)} className="brutal-border" style={{ padding: '0.75rem', minHeight: '80px', backgroundColor: '#fff' }} placeholder="Nhập bình luận của bạn..."></textarea>
+                  <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', alignSelf: 'flex-end', gap: '0.5rem' }}><Send size={16} /> Gửi Bình Luận</button>
                 </form>
-              ) : <p style={{ marginBottom: '1rem', fontWeight: 'bold' }}>Vui lòng đăng nhập để bình luận.</p>}
+              ) : <p style={{ marginBottom: '1rem', fontWeight: 'bold' }}>Vui lòng đăng nhập để tham gia bình luận.</p>}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {comments.map(cmt => (
                   <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb' }}>
-                    <p style={{ marginTop: '0.25rem' }}>{cmt.content}</p>
+                    <p style={{ marginTop: '0.25rem', fontWeight: '500' }}>{cmt.content}</p>
                   </div>
                 ))}
               </div>
