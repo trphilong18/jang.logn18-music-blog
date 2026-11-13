@@ -1,68 +1,21 @@
-import React, { useState } from 'react';
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
 
-// --- ĐỊNH DẠNG CSS BRUTALIST (GẮN TRỰC TIẾP ĐỂ KHÔNG BAO GIỜ BỊ LỖI MẤT STYLE) ---
-const GlobalStyles = () => (
-  <style>{`
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #ffffff;
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #000000;
-    }
-    * {
-      border-radius: 0 !important;
-      box-sizing: border-box;
-    }
-    .brutalist-box {
-      border: 3px solid #000000;
-      box-shadow: 4px 4px 0px #000000;
-      transition: all 0.1s ease;
-    }
-    .brutalist-box:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 6px 6px 0px #000000;
-    }
-    .brutalist-btn {
-      border: 3px solid #000000;
-      background-color: #39EFB2;
-      font-weight: bold;
-      box-shadow: 3px 3px 0px #000000;
-      cursor: pointer;
-    }
-    .brutalist-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0px #000000;
-    }
-  `}</style>
-);
+.font-space { font-family: 'Space Grotesk', sans-serif; }
+.font-title { font-family: 'BD StreetSign Sans Standard', 'BD StreetSigns', Impact, system-ui, sans-serif; font-weight: normal; }
 
-export default function App() {
-  const [currentView, setCurrentView] = useState('home');
+.brutal-border { border: 2px solid #000; border-radius: 0px !important; }
+.brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
+.brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
+.brutal-shadow-yellow { box-shadow: 4px 4px 0px 0px #FACB54; }
 
-  return (
-    <div style={{ minHeight: '100vh', padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <GlobalStyles />
-      
-      {/* HEADER */}
-      <header className="brutalist-box" style={{ padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FACB54', marginBottom: '20px' }}>
-        <div>
-          <span style={{ fontWeight: '900', fontSize: '20px' }}>jang.logn18</span> music blog
-        </div>
-        <button className="brutalist-btn" style={{ padding: '8px 16px' }}>
-          Đăng nhập
-        </button>
-      </header>
-
-      {/* NỘI DUNG CHÍNH */}
-      <main className="brutalist-box" style={{ padding: '30px', backgroundColor: '#39EFB2' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '900', textTransform: 'uppercase', margin: '0 0 10px 0' }}>
-          Chào mừng đến với Blog âm nhạc!
-        </h1>
-        <p style={{ fontSize: '18px', fontWeight: '500' }}>
-          Giao diện Brutalist đã được kích hoạt thành công trực tiếp trong mã nguồn. Bạn sẽ thấy các đường viền sắc nét và khối màu nổi bật ngay lập tức.
-        </p>
-      </main>
-    </div>
-  );
+.brutal-btn {
+  transition: all 0.1s ease-in-out;
+  cursor: pointer;
 }
+.brutal-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px transparent !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
