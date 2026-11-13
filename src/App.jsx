@@ -118,11 +118,11 @@ export default function App() {
     }
   };
 
-  // Lấy bình luận kèm theo tên hiển thị từ bảng profiles
+  // 1. Lấy danh sách bình luận (không join bảng, an toàn tuyệt đối)
   const fetchComments = async (sheetId) => {
     const { data, error } = await supabase
       .from('comments')
-      .select('*, profiles(display_name)')
+      .select('*')
       .eq('sheet_id', sheetId)
       .order('created_at', { ascending: false });
       
@@ -133,36 +133,25 @@ export default function App() {
     }
   };
 
-  const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
-  };
+  // 2. Gửi bình luận kèm theo tên người dùng
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newCommentText.trim() || !isLoggedIn) return;
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsLoggedIn(false);
-    setUser(null);
-    setIsPlaying(false);
-    setCurrentTrack(null);
-    setCurrentView('home');
-  };
+    const newCmt = {
+      sheet_id: currentTrack.id,
+      user_id: user.id,
+      user_name: profile?.display_name || user?.user_metadata?.full_name || user?.email || 'Người dùng',
+      content: newCommentText
+    };
 
-  const dynamicGenres = ['All', ...new Set(sheets.map(s => s.genre).filter(Boolean))];
-
-  const filteredSheets = sheets.filter(sheet => {
-    const matchesSearch = sheet.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGenre = selectedGenre === 'All' || sheet.genre === selectedGenre;
-    return matchesSearch && matchesGenre;
-  });
-
-  const handlePlaySheet = (sheet) => {
-    if (currentTrack?.id !== sheet.id) {
-      setCurrentTrack(sheet);
-      setIsPlaying(false);
-      setCurrentTime(0);
+    const { data, error } = await supabase.from('comments').insert([newCmt]).select();
+    if (!error && data) {
+      setComments([data[0], ...comments]);
+      setNewCommentText('');
+    } else {
+      alert('Lỗi gửi bình luận: ' + error.message);
     }
-    setCurrentView('player');
-    window.scrollTo(0, 0);
-    fetchComments(sheet.id);
   };
 
   const handleReadPost = (post) => {
@@ -593,15 +582,15 @@ export default function App() {
               ) : <p style={{ marginBottom: '1rem', fontWeight: 'bold' }}>Vui lòng đăng nhập để tham gia bình luận.</p>}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {comments.map(cmt => (
-                  <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#3B2AA2' }}>
-                      {cmt.profiles?.display_name || 'Người dùng ẩn danh'}
-                    </span>
-                    <p style={{ fontWeight: '500' }}>{cmt.content}</p>
-                  </div>
-                ))}
-              </div>
+    {comments.map(cmt => (
+      <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#3B2AA2' }}>
+          {cmt.user_name || 'Người dùng ẩn danh'}
+        </span>
+        <p style={{ fontWeight: '500' }}>{cmt.content}</p>
+      </div>
+    ))}
+  </div>
             </div>
           </div>
         )}
