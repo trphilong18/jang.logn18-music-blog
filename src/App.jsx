@@ -65,15 +65,11 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
         
-        @font-face {
-          font-family: 'BD StreetSignsSans';
-          src: url('/fonts/BDStreetSignsSans-Standard.otf') format('opentype'); 
-          font-weight: normal;
-          font-style: normal;
+        @import url('https://fonts.googleapis.com/css2?family=Phudu:wght@400;500;700&display=swap');
         }
 
         * { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
-        .font-title { font-family: 'BD StreetSignsSans', Impact, system-ui, sans-serif !important; font-weight: normal; }
+        .font-title { font-family: 'Phudu', Impact, system-ui, sans-serif !important; font-weight: normal; }
         .brutal-border { border: 2px solid #000; }
         .brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
         .brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
