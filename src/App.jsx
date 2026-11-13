@@ -676,36 +676,43 @@ export default function App() {
                     Engineering & Architecture Undergraduate - HCMUT
                   </p>
                 </div>
+                <div>
+                  <p className="brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.5rem 1rem', fontWeight: '500', fontSize: '0.875rem' }}>
+                    Engineering & Architecture Undergraduate - HCMUT
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* THÔNG TIN DONATE / ỦNG HỘ */}
             <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#FACB54', color: '#000', display: 'flex', flexDirection: 'column', gap: '0.5rem', maxWidth: '320px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1rem' }}>
-                <Coffee size={20} /> Ủng Hộ Tác Giả (Donate)
+                <Coffee size={20} /> Ủng hộ mình
               </div>
               <p style={{ fontSize: '0.85rem', fontWeight: '500', lineHeight: 1.4 }}>
-                MoMo / Chuyển khoản ngân hàng: <br/>
-                <strong>09xxxxxxxx (Trương Phi Long)</strong>
+                MoMo: <br/>
+                <strong>0817311006 (Trương Phi Long)</strong>
+                Vietcombank: <br/>
+                <strong>1817311006 (TRUONG PHI LONG)</strong>
               </p>
             </div>
           </div>
 
           {/* PHẦN 2: CÁC NÚT LIÊN KẾT MẠNG XÃ HỘI (HOÀN TOÀN KHÔNG CÓ ICON & KHÔNG COPYRIGHT) */}
           <div style={{ borderTop: '2px dashed rgba(255,255,255,0.3)', paddingTop: '2rem', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+            <a href="https://instagram.com/jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
               Instagram
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+            <a href="https://facebook.com/jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
               Facebook
             </a>
-            <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+            <a href="https://www.tiktok.com/@jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
               TikTok
             </a>
-            <a href="https://soundcloud.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+            <a href="https://soundcloud.com/jang_logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
               SoundCloud
             </a>
-            <a href="https://youtube.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+            <a href="https://www.youtube.com/@jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
               YouTube
             </a>
           </div>
