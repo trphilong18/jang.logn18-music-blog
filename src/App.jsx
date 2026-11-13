@@ -62,43 +62,48 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000', fontFamily: "'Space Grotesk', sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
-        
-        @import url('https://fonts.googleapis.com/css2?family=Phudu:wght@400;500;700&display=swap');
-        }
+     <style>{`
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Phudu:wght@400;500;700;900&display=swap');
 
-        /* BẮT BUỘC CÁC NÚT VÀ Ô NHẬP LIỆU PHẢI KẾ THỪA FONT CHỮ CỦA WEB */
-        button, input, textarea { font-family: inherit; }
+  * { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
+  
+  /* ÉP CÁC NÚT KẾ THỪA FONT SPACE GROTESK TỪ THẺ DIV TỔNG */
+  button, input, textarea { font-family: inherit; }
 
-        .font-title { font-family: 'Phudu', system-ui, sans-serif !important; font-weight: normal; }
-        .brutal-border { border: 2px solid #000; }
-        /* ... (giữ nguyên các phần class brutalist bên dưới) ... */
+  /* FONT TIÊU ĐỀ PHUDU */
+  .font-title { font-family: 'Phudu', system-ui, sans-serif !important; font-weight: bold; }
 
-        * { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
-        .font-title { font-family: 'Phudu', system-ui, sans-serif !important; font-weight: bold; }
-        .brutal-border { border: 2px solid #000; }
-        .brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
-        .brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
-        .brutal-shadow-yellow { box-shadow: 4px 4px 0px 0px #FACB54; }
-        .brutal-btn { transition: all 0.1s ease-in-out; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
-        .brutal-btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px transparent !important; }
-        .uppercase { text-transform: uppercase; }
-        
-        /* Layout Helpers */
-        .flex { display: flex; }
-        .flex-col { display: flex; flexDirection: column; }
-        .items-center { alignItems: center; }
-        .justify-between { justifyContent: space-between; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-4 { gap: 1rem; }
-        .gap-6 { gap: 1.5rem; }
-        .w-full { width: 100%; }
-        
-        /* Utils */
-        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-      `}</style>
+  .brutal-border { border: 2px solid #000; }
+  .brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
+  .brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
+  .brutal-shadow-yellow { box-shadow: 4px 4px 0px 0px #FACB54; }
+  
+  .brutal-btn { 
+    transition: all 0.1s ease-in-out; 
+    cursor: pointer; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+  }
+  .brutal-btn:active { 
+    transform: translate(4px, 4px); 
+    box-shadow: 0px 0px 0px 0px transparent !important; 
+  }
+  
+  .uppercase { text-transform: uppercase; }
+  .flex { display: flex; }
+  .flex-col { display: flex; flex-direction: column; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .gap-2 { gap: 0.5rem; }
+  .gap-4 { gap: 1rem; }
+  .gap-6 { gap: 1.5rem; }
+  .w-full { width: 100%; }
+  .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+`}</style>
       
       {/* HEADER */}
       <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
