@@ -69,7 +69,7 @@ export default function App() {
         }
 
         * { border-radius: 0 !important; box-sizing: border-box; margin: 0; padding: 0; }
-        .font-title { font-family: 'Phudu', Impact, system-ui, sans-serif !important; font-weight: normal; }
+        .font-title { font-family: 'Phudu', Impact, system-ui, sans-serif !important; font-weight: bold; }
         .brutal-border { border: 2px solid #000; }
         .brutal-shadow-mint { box-shadow: 4px 4px 0px 0px #39EFB2; }
         .brutal-shadow-purple { box-shadow: 4px 4px 0px 0px #3B2AA2; }
