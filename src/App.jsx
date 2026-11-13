@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   Play, Pause, Heart, Share2, 
   User, FileText, ChevronLeft, Volume2,
-  FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles
+  FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search
 } from 'lucide-react';
 
 import { supabase } from './supabaseClient';
 
 const MOCK_STATS = { totalHours: 124, topSong: 'Nocturne Op. 9 No. 2', totalSheets: 45, streak: 12 };
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
+
 const MOCK_SHEETS = [
   { id: '1', title: 'Nocturne Op. 9 No. 2', artist: 'Frédéric Chopin', genre: 'Classical', cover: 'https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&q=80&w=400' },
   { id: '2', title: 'Gurenge (Demon Slayer)', artist: 'LiSA (Piano Cover)', genre: 'Anime', cover: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=400' },
@@ -17,8 +18,13 @@ const MOCK_SHEETS = [
 ];
 
 const MOCK_POSTS = [
-  { id: '1', title: 'Hành trình chinh phục La Campanella', date: '24/10/2026', excerpt: 'Kinh nghiệm vượt qua những đoạn nhảy quãng khó nhằn...', content: 'Nội dung chi tiết bài viết...' },
-  { id: '2', title: 'Tại sao mình thích dùng MuseScore hơn Sibelius?', date: '15/10/2026', excerpt: 'So sánh chi tiết 2 phần mềm viết nhạc...', content: 'MuseScore hoàn toàn miễn phí...' }
+  { id: '1', title: 'Hành trình chinh phục La Campanella', date: '24/10/2026', excerpt: 'Một vài kinh nghiệm và bài tập ngón giúp bạn vượt qua những đoạn nhảy quãng khó nhằn...', content: 'La Campanella là một trong những bản nhạc kinh điển đòi hỏi kỹ thuật nhảy quãng cực kỳ chuẩn xác.\n\nThứ nhất, hãy bắt đầu thật chậm. Thứ hai, sự thả lỏng cổ tay là yếu tố quyết định để tay không bị mỏi khi chơi ở tốc độ cao.' },
+  { id: '2', title: 'Tại sao mình thích dùng MuseScore hơn Sibelius?', date: '15/10/2026', excerpt: 'So sánh chi tiết 2 phần mềm viết nhạc phổ biến nhất hiện nay dựa trên trải nghiệm cá nhân...', content: 'MuseScore hoàn toàn miễn phí và mã nguồn mở, đây là một điểm cộng rất lớn cho cộng đồng làm nhạc.\n\nTừ phiên bản 4.0, giao diện của MuseScore thực sự đã lột xác hiện đại và chuyên nghiệp hơn.' }
+];
+
+const MOCK_COMMENTS = [
+  { id: 1, user: 'Hoàng Trần', text: 'Bản sheet này rất chi tiết, cảm ơn bạn nhiều nhé! Đánh rất sướng tay.', time: '2 giờ trước' },
+  { id: 2, user: 'Linh Nguyễn', text: 'Cho mình hỏi đoạn tempo ở ô nhịp 32 đánh sao cho mượt ạ?', time: '5 giờ trước' }
 ];
 
 export default function App() {
@@ -30,9 +36,11 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // Trạng thái Tìm kiếm & Lọc
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
 
+  // Lắng nghe trạng thái đăng nhập từ Supabase
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -76,6 +84,7 @@ export default function App() {
     setCurrentView('home');
   };
 
+  // Lọc danh sách sheet nhạc theo từ khóa và thể loại
   const filteredSheets = MOCK_SHEETS.filter(sheet => {
     const matchesSearch = sheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           sheet.artist.toLowerCase().includes(searchTerm.toLowerCase());
@@ -126,8 +135,10 @@ export default function App() {
         .brutal-btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px transparent !important; }
         .uppercase { text-transform: uppercase; }
         .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
       
+      {/* HEADER */}
       <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => setCurrentView('home')}>
           jang.logn18 music
@@ -146,40 +157,76 @@ export default function App() {
         </div>
       </header>
 
+      {/* MAIN CONTENT */}
       <main style={{ maxWidth: '1152px', margin: '0 auto', padding: '2rem 1rem', paddingBottom: '5rem' }}>
+        
+        {/* --- TRANG CHỦ --- */}
         {currentView === 'home' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <input 
-                type="text" 
-                placeholder="Tìm kiếm bài hát, nghệ sĩ..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="brutal-border"
-                style={{ padding: '0.75rem 1rem', fontSize: '1rem', width: '100%', fontWeight: 'bold', backgroundColor: '#fff' }}
-              />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            
+            <button className="brutal-btn brutal-border brutal-shadow-mint uppercase font-title" style={{ padding: '1rem 2rem', backgroundColor: '#FACB54', fontSize: '1.25rem', alignSelf: 'flex-start', gap: '0.75rem' }}>
+              <Sparkles size={24} /> Đề xuất bài hát
+            </button>
 
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button 
-                  onClick={() => setSelectedGenre('All')}
-                  className="brutal-btn brutal-border uppercase"
-                  style={{ padding: '0.5rem 1rem', backgroundColor: selectedGenre === 'All' ? '#39EFB2' : '#fff' }}
-                >
-                  Tất cả
-                </button>
-                {MOCK_TOPICS.map((topic, idx) => (
+            {/* THỐNG KÊ (STATS) & CHỦ ĐỀ */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
+                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Dữ Liệu Nghe</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontWeight: '500' }}>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}>
+                    <span>Tổng thời gian:</span> <strong>{MOCK_STATS.totalHours} giờ</strong>
+                  </p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}>
+                    <span>Bài hát tuần:</span> <strong className="truncate" style={{ maxWidth: '140px' }}>{MOCK_STATS.topSong}</strong>
+                  </p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}>
+                    <span>Chuỗi nghe:</span> <strong>{MOCK_STATS.streak} ngày</strong>
+                  </p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Tổng sheet:</span> <strong>{MOCK_STATS.totalSheets}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* THANH TÌM KIẾM & BỘ LỌC CHỦ ĐỀ GỘP CHUNG */}
+              <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.5rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.5rem' }}>Tìm Kiếm & Lọc</h2>
+                
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Tìm kiếm bài hát, nghệ sĩ..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="brutal-border"
+                    style={{ padding: '0.65rem 1rem 0.65rem 2.5rem', fontSize: '0.95rem', width: '100%', fontWeight: 'bold', backgroundColor: '#f9fafb' }}
+                  />
+                  <Search size={18} style={{ position: 'absolute', top: '0.75rem', left: '0.75rem', color: '#6b7280' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <button 
-                    key={idx} 
-                    onClick={() => setSelectedGenre(topic)}
+                    onClick={() => setSelectedGenre('All')}
                     className="brutal-btn brutal-border uppercase"
-                    style={{ padding: '0.5rem 1rem', backgroundColor: selectedGenre === topic ? '#39EFB2' : '#fff', fontSize: '0.875rem' }}
+                    style={{ padding: '0.4rem 0.75rem', backgroundColor: selectedGenre === 'All' ? '#39EFB2' : '#fff', fontSize: '0.8rem' }}
                   >
-                    {topic}
+                    Tất cả
                   </button>
-                ))}
+                  {MOCK_TOPICS.map((topic, idx) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => setSelectedGenre(topic)}
+                      className="brutal-btn brutal-border uppercase"
+                      style={{ padding: '0.4rem 0.75rem', backgroundColor: selectedGenre === topic ? '#39EFB2' : '#fff', fontSize: '0.8rem' }}
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
+            {/* DANH SÁCH SHEET NHẠC */}
             <div>
               <h2 className="font-title uppercase brutal-border brutal-shadow-purple" style={{ display: 'inline-block', backgroundColor: '#39EFB2', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
                 Bản Nhạc Mới ({filteredSheets.length})
@@ -202,9 +249,133 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {/* BÀI VIẾT BLOG */}
+            <div>
+              <h2 className="font-title uppercase brutal-border brutal-shadow-yellow" style={{ display: 'inline-block', backgroundColor: '#3B2AA2', color: '#fff', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
+                Bài Viết (Blog)
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {MOCK_POSTS.map(post => (
+                  <div key={post.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '250px' }}>
+                      <h3 className="font-title uppercase" style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{post.title}</h3>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#4b5563', borderBottom: '2px solid #000', display: 'inline-block', paddingBottom: '0.25rem', marginBottom: '0.75rem' }}>
+                        {post.date}
+                      </div>
+                      <p className="line-clamp-2" style={{ fontSize: '0.875rem', color: '#1f2937' }}>{post.excerpt}</p>
+                    </div>
+                    <button onClick={() => handleReadPost(post)} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1.5rem', backgroundColor: '#fff', fontSize: '0.875rem' }}>
+                      Đọc
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         )}
 
+        {/* --- TRANG ĐỌC BÀI VIẾT (BLOG POST) --- */}
+        {currentView === 'post' && currentPost && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start', gap: '0.5rem' }}>
+              <ChevronLeft size={18} /> Quay Lại
+            </button>
+            <div className="brutal-border brutal-shadow-yellow" style={{ padding: '2.5rem', backgroundColor: '#fff' }}>
+              <h1 className="font-title uppercase" style={{ fontSize: '2.5rem', lineHeight: 1.2, marginBottom: '1rem' }}>{currentPost.title}</h1>
+              <div className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', borderBottom: '4px solid #000', display: 'inline-block', paddingBottom: '1rem', marginBottom: '2rem' }}>
+                Đăng ngày: {currentPost.date}
+              </div>
+              <div style={{ fontSize: '1.125rem', lineHeight: 1.8, whiteSpace: 'pre-line', fontWeight: '500' }}>
+                {currentPost.content}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- TRANG TRÌNH PHÁT NHẠC & SHEET (PLAYER) --- */}
+        {currentView === 'player' && currentTrack && (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            
+            <div className="brutal-shadow-mint" style={{ position: 'sticky', top: '70px', zIndex: 40, backgroundColor: '#fff', padding: '1rem 0', marginBottom: '2rem', borderBottom: '4px solid #000' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', gap: '0.5rem' }}>
+                  <ChevronLeft size={18} /> Quay Lại
+                </button>
+                <div style={{ textAlign: 'right', flex: 1, overflow: 'hidden' }}>
+                  <h1 className="font-title uppercase truncate" style={{ fontSize: '2rem', lineHeight: 1 }}>{currentTrack.title}</h1>
+                  <p className="uppercase truncate" style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '0.875rem' }}>{currentTrack.artist}</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                <div className="brutal-border brutal-shadow-yellow" style={{ flex: 1, backgroundColor: '#fff', padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '300px' }}>
+                  <button onClick={togglePlay} className="brutal-btn brutal-border" style={{ width: '2.5rem', height: '2.5rem', backgroundColor: '#3B2AA2', color: '#fff', flexShrink: 0 }}>
+                    {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                  </button>
+                  <div style={{ flex: 1 }}>
+                    <div className="brutal-border" style={{ width: '100%', height: '0.75rem', backgroundColor: '#f3f4f6', position: 'relative' }}>
+                      <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', backgroundColor: '#39EFB2', width: `${progress}%`, borderRight: '2px solid #000', transition: 'width 0.3s' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <button className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 0.75rem', backgroundColor: '#3B2AA2', color: '#fff', fontSize: '0.75rem', gap: '0.5rem' }}><FileDown size={14} /> PDF</button>
+                  <button className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 0.75rem', backgroundColor: '#FACB54', fontSize: '0.75rem', gap: '0.5rem' }}><Disc size={14} /> MIDI</button>
+                </div>
+              </div>
+            </div>
+
+            {/* KHU VỰC HIỂN THỊ SHEET */}
+            <div className="brutal-border brutal-shadow-purple" style={{ width: '100%', aspectRatio: '3/4', maxHeight: '600px', backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '3rem', position: 'relative', overflow: 'hidden' }}>
+              <FileText size={64} style={{ color: '#d1d5db', marginBottom: '1rem', strokeWidth: 1 }} />
+              <p className="font-title uppercase" style={{ fontSize: '1.25rem', color: '#9ca3af', textAlign: 'center', padding: '0 1rem' }}>
+                Khu vực hiển thị Sheet Music - {currentTrack.title}
+              </p>
+            </div>
+
+            {/* PHẦN BÌNH LUẬN */}
+            <div className="brutal-border brutal-shadow-yellow" style={{ padding: '1.5rem', backgroundColor: '#fff' }}>
+              <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <MessageSquare size={24} /> Bình Luận
+              </h2>
+              
+              <div style={{ marginBottom: '2rem' }}>
+                {isLoggedIn ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <textarea className="brutal-border" style={{ width: '100%', padding: '0.75rem', fontWeight: '500', minHeight: '100px', resize: 'vertical', backgroundColor: '#fff' }} placeholder="Nhập bình luận của bạn..."></textarea>
+                    <button className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1.5rem', backgroundColor: '#39EFB2', alignSelf: 'flex-end', gap: '0.5rem' }}>
+                      <Send size={16} /> Gửi Bình Luận
+                    </button>
+                  </div>
+                ) : (
+                  <div className="brutal-border" style={{ padding: '1.5rem', backgroundColor: '#f3f4f6', textAlign: 'center' }}>
+                    <p className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', marginBottom: '1rem' }}>Vui lòng đăng nhập để bình luận</p>
+                    <button onClick={handleLogin} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#3B2AA2', color: '#fff', gap: '0.5rem' }}>
+                      <User size={18} /> Đăng Nhập Ngay
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {MOCK_COMMENTS.map(cmt => (
+                  <div key={cmt.id} className="brutal-border" style={{ padding: '1rem', backgroundColor: '#f9fafb' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid rgba(0,0,0,0.1)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+                      <span className="uppercase" style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{cmt.user}</span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#6b7280' }}>{cmt.time}</span>
+                    </div>
+                    <p style={{ fontWeight: '500', color: '#1f2937' }}>{cmt.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- TRANG HỒ SƠ (PROFILE) --- */}
         {currentView === 'profile' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
             <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start', gap: '0.5rem' }}>
