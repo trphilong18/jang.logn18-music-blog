@@ -7,8 +7,7 @@ import {
 
 import { supabase } from './supabaseClient';
 
-const MOCK_STATS = { totalHours: 124, topSong: 'Nocturne Op. 9 No. 2', totalSheets: 45, streak: 12 };
-const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
+const MOCK_STATS = { totalHours: 124, topSong: 'Nocturne Op. 9 No. 2', streak: 12 };
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -32,13 +31,15 @@ export default function App() {
   // Trạng thái bình luận
   const [newCommentText, setNewCommentText] = useState('');
 
-  // Form Admin
+  // Form Admin (Thêm Sheet & Description)
   const [newTitle, setNewTitle] = useState('');
   const [newGenre, setNewGenre] = useState('Classical');
+  const [newDescription, setNewDescription] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
   const [midiFile, setMidiFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
 
+  // Form Admin (Đăng bài viết)
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
 
@@ -77,7 +78,6 @@ export default function App() {
   const fetchProfile = async (userId) => {
     let { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (error || !data) {
-      // Nếu chưa có profile thì tạo mới
       const newProf = { id: userId, display_name: user?.user_metadata?.full_name || 'Trương Phi Long', role: 'user' };
       await supabase.from('profiles').insert([newProf]);
       setProfile(newProf);
@@ -92,7 +92,7 @@ export default function App() {
   };
 
   const fetchPosts = async () => {
-    const { data, error } = await supabase.from('posts').select('*');
+    const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
     if (!error && data) setPosts(data);
   };
 
@@ -133,6 +133,9 @@ export default function App() {
     setCurrentView('home');
   };
 
+  // Tự động lấy danh sách các chủ đề (genre) độc đáo có trong database sheets
+  const dynamicGenres = ['All', ...new Set(sheets.map(s => s.genre).filter(Boolean))];
+
   const filteredSheets = sheets.filter(sheet => {
     const matchesSearch = sheet.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGenre = selectedGenre === 'All' || sheet.genre === selectedGenre;
@@ -163,7 +166,6 @@ export default function App() {
     alert('Đã sao chép liên kết bài hát!');
   };
 
-  // Toggle Like chuẩn theo bảng likes
   const toggleLike = async () => {
     if (!isLoggedIn) return alert('Vui lòng đăng nhập!');
     const sheetId = currentTrack.id;
@@ -178,7 +180,6 @@ export default function App() {
     }
   };
 
-  // Gửi bình luận chuẩn theo bảng comments
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!newCommentText.trim() || !isLoggedIn) return;
@@ -198,7 +199,6 @@ export default function App() {
     }
   };
 
-  // Admin upload sheet & files thực tế
   const handleAddSheet = async (e) => {
     e.preventDefault();
     if (!newTitle) return alert('Vui lòng nhập tên bài!');
@@ -225,6 +225,7 @@ export default function App() {
     const newItem = {
       title: newTitle,
       genre: newGenre,
+      description: newDescription,
       pdf_url, midi_url, audio_url,
       uploader_id: user.id
     };
@@ -233,6 +234,7 @@ export default function App() {
     if (!error && data) {
       setSheets([data[0], ...sheets]);
       setNewTitle('');
+      setNewDescription('');
       setPdfFile(null); setMidiFile(null); setAudioFile(null);
       alert('Tải lên thành công!');
     } else {
@@ -305,16 +307,21 @@ export default function App() {
         {/* TRANG CHỦ */}
         {currentView === 'home' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            
+            {/* PLAY STATS & TÌM KIẾM */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
               <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
-                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Dữ Liệu Nghe</h2>
+                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Dữ Liệu Nghe (Play Stats)</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontWeight: '500' }}>
-                  <p style={{ display: 'flex', justifyContent: 'space-between' }}><span>Tổng sheet:</span> <strong>{sheets.length}</strong></p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}><span>Tổng thời gian:</span> <strong>{MOCK_STATS.totalHours} giờ</strong></p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}><span>Bài hát tuần:</span> <strong>{MOCK_STATS.topSong}</strong></p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}><span>Chuỗi nghe:</span> <strong>{MOCK_STATS.streak} ngày</strong></p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between' }}><span>Tổng sheet:</span> <strong>{sheets.length} bài</strong></p>
                 </div>
               </div>
 
               <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.5rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.5rem' }}>Tìm Kiếm & Lọc</h2>
+                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.5rem' }}>Tìm Kiếm & Chủ Đề</h2>
                 <input 
                   type="text" 
                   placeholder="Tìm kiếm bài hát..." 
@@ -323,34 +330,64 @@ export default function App() {
                   className="brutal-border"
                   style={{ padding: '0.65rem 1rem', fontSize: '0.95rem', width: '100%', fontWeight: 'bold' }}
                 />
+                {/* HIỂN THỊ CÁC CHỦ ĐỀ ĐÃ CÓ TRONG GENRE */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <button onClick={() => setSelectedGenre('All')} className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.75rem', backgroundColor: selectedGenre === 'All' ? '#39EFB2' : '#fff', fontSize: '0.8rem' }}>Tất cả</button>
-                  {MOCK_TOPICS.map((topic, idx) => (
-                    <button key={idx} onClick={() => setSelectedGenre(topic)} className="brutal-btn brutal-border uppercase" style={{ padding: '0.4rem 0.75rem', backgroundColor: selectedGenre === topic ? '#39EFB2' : '#fff', fontSize: '0.8rem' }}>{topic}</button>
+                  {dynamicGenres.map((genre, idx) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => setSelectedGenre(genre)} 
+                      className="brutal-btn brutal-border uppercase" 
+                      style={{ padding: '0.4rem 0.75rem', backgroundColor: selectedGenre === genre ? '#39EFB2' : '#fff', fontSize: '0.8rem' }}
+                    >
+                      {genre === 'All' ? 'Tất cả' : genre}
+                    </button>
                   ))}
                 </div>
               </div>
             </div>
 
+            {/* ADMIN DASHBOARD (TẢI NHẠC & ĐĂNG BÀI VIẾT) */}
             {isAdmin && (
-              <div className="brutal-border brutal-shadow-yellow" style={{ padding: '2rem', backgroundColor: '#fff9e6' }}>
-                <h2 className="font-title uppercase" style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>🛡️ Admin Dashboard</h2>
-                <form onSubmit={handleAddSheet} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '400px' }}>
-                  <input type="text" placeholder="Tên bài hát..." value={newTitle} onChange={e => setNewTitle(e.target.value)} className="brutal-border" style={{ padding: '0.5rem' }} />
-                  <select value={newGenre} onChange={e => setNewGenre(e.target.value)} className="brutal-border" style={{ padding: '0.5rem' }}>
-                    {MOCK_TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>PDF:</label>
-                  <input type="file" accept=".pdf" onChange={e => setPdfFile(e.target.files[0])} />
-                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>MIDI:</label>
-                  <input type="file" accept=".mid" onChange={e => setMidiFile(e.target.files[0])} />
-                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Audio:</label>
-                  <input type="file" accept="audio/*" onChange={e => setAudioFile(e.target.files[0])} />
-                  <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem', backgroundColor: '#39EFB2' }}><Upload size={16} /> Lưu Sheet</button>
-                </form>
+              <div className="brutal-border brutal-shadow-yellow" style={{ padding: '2rem', backgroundColor: '#fff9e6', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.75rem', color: '#b45309' }}>🛡️ Admin Dashboard (Trương Phi Long)</h2>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                  {/* Form Tải Sheet & Description */}
+                  <form onSubmit={handleAddSheet} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <h3 className="font-title uppercase" style={{ fontSize: '1.125rem' }}>Tải Lên Sheet Nhạc</h3>
+                    <input type="text" placeholder="Tên bài hát..." value={newTitle} onChange={e => setNewTitle(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff' }} />
+                    <input type="text" placeholder="Chủ đề / Thể loại (Genre)..." value={newGenre} onChange={e => setNewGenre(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff' }} />
+                    
+                    <textarea 
+                      placeholder="Mô tả / Description (Hỗ trợ định dạng văn bản)..." 
+                      value={newDescription} 
+                      onChange={e => setNewDescription(e.target.value)} 
+                      className="brutal-border" 
+                      style={{ padding: '0.5rem', backgroundColor: '#fff', minHeight: '70px', resize: 'vertical' }}
+                    ></textarea>
+
+                    <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>PDF:</label>
+                    <input type="file" accept=".pdf" onChange={e => setPdfFile(e.target.files[0])} />
+                    <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>MIDI:</label>
+                    <input type="file" accept=".mid" onChange={e => setMidiFile(e.target.files[0])} />
+                    <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Audio:</label>
+                    <input type="file" accept="audio/*" onChange={e => setAudioFile(e.target.files[0])} />
+
+                    <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem', backgroundColor: '#39EFB2', marginTop: '0.5rem' }}><Upload size={16} /> Lưu Sheet Nhạc</button>
+                  </form>
+
+                  {/* Form Đăng Bài Viết */}
+                  <form onSubmit={handleAddPost} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <h3 className="font-title uppercase" style={{ fontSize: '1.125rem' }}>Đăng Bài Viết Mới</h3>
+                    <input type="text" placeholder="Tiêu đề bài viết..." value={newPostTitle} onChange={e => setNewPostTitle(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff' }} />
+                    <textarea placeholder="Nội dung chi tiết..." value={newPostContent} onChange={e => setNewPostContent(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff', minHeight: '120px', resize: 'vertical' }}></textarea>
+                    <button type="submit" className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem', backgroundColor: '#3B2AA2', color: '#fff', marginTop: 'auto' }}><PlusCircle size={16} /> Đăng Bài Viết</button>
+                  </form>
+                </div>
               </div>
             )}
 
+            {/* DANH SÁCH SHEET NHẠC */}
             <div>
               <h2 className="font-title uppercase brutal-border brutal-shadow-purple" style={{ display: 'inline-block', backgroundColor: '#39EFB2', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
                 Bản Nhạc Mới ({filteredSheets.length})
@@ -358,14 +395,47 @@ export default function App() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 320px))', gap: '1.5rem' }}>
                 {filteredSheets.map(sheet => (
                   <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
-                    <h3 className="font-title uppercase truncate" style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>{sheet.title}</h3>
-                    <p className="uppercase" style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '1rem' }}>{sheet.genre}</p>
+                    <h3 className="font-title uppercase truncate" style={{ fontSize: '1.125rem', marginBottom: '0.25rem' }}>{sheet.title}</h3>
+                    <p className="uppercase" style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '0.5rem' }}>{sheet.genre}</p>
+                    {sheet.description && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1rem' }}>{sheet.description}</p>}
                     <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', width: '100%' }}>
                       <Play size={16} /> Nghe & Xem Sheet
                     </button>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* BÀI VIẾT BLOG */}
+            <div>
+              <h2 className="font-title uppercase brutal-border brutal-shadow-yellow" style={{ display: 'inline-block', backgroundColor: '#3B2AA2', color: '#fff', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
+                Bài Viết (Blog)
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {posts.map(post => (
+                  <div key={post.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '250px' }}>
+                      <h3 className="font-title uppercase" style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{post.title}</h3>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#4b5563', borderBottom: '2px solid #000', display: 'inline-block', paddingBottom: '0.25rem', marginBottom: '0.75rem' }}>{post.date}</div>
+                      <p className="line-clamp-2" style={{ fontSize: '0.875rem', color: '#1f2937' }}>{post.excerpt}</p>
+                    </div>
+                    <button onClick={() => handleReadPost(post)} className="brutal-btn brutal-border brutal-shadow-purple uppercase" style={{ padding: '0.5rem 1.5rem', backgroundColor: '#fff', fontSize: '0.875rem' }}>Đọc</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* TRANG ĐỌC BÀI VIẾT */}
+        {currentView === 'post' && currentPost && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start' }}><ChevronLeft size={18} /> Quay Lại</button>
+            <div className="brutal-border brutal-shadow-yellow" style={{ padding: '2.5rem', backgroundColor: '#fff' }}>
+              <h1 className="font-title uppercase" style={{ fontSize: '2.5rem', lineHeight: 1.2, marginBottom: '1rem' }}>{currentPost.title}</h1>
+              <div className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', borderBottom: '4px solid #000', display: 'inline-block', paddingBottom: '1rem', marginBottom: '2rem' }}>Đăng ngày: {currentPost.date}</div>
+              <div style={{ fontSize: '1.125rem', lineHeight: 1.8, whiteSpace: 'pre-line', fontWeight: '500' }}>{currentPost.content}</div>
             </div>
           </div>
         )}
@@ -378,6 +448,7 @@ export default function App() {
                 <ChevronLeft size={18} /> Quay Lại
               </button>
               <h1 className="font-title uppercase" style={{ fontSize: '1.75rem' }}>{currentTrack.title}</h1>
+              {currentTrack.description && <p style={{ marginTop: '0.5rem', fontSize: '0.95rem', fontWeight: '500', color: '#4b5563', whiteSpace: 'pre-line' }}>{currentTrack.description}</p>}
               
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <button onClick={toggleLike} className="brutal-btn brutal-border" style={{ padding: '0.5rem', backgroundColor: isCurrentLiked ? '#ef4444' : '#fff', color: isCurrentLiked ? '#fff' : '#000' }}>
@@ -438,6 +509,52 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* FOOTER ĐÃ ĐƯỢC KHÔI PHỤC TRỞ LẠI */}
+      <footer style={{ marginTop: '5rem', borderTop: '4px solid #000', backgroundColor: '#3B2AA2', padding: '4rem 1rem', position: 'relative', overflow: 'hidden', color: '#fff' }}>
+        <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+            <div className="brutal-border brutal-shadow-yellow" style={{ width: '8rem', height: '8rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
+              <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div>
+              <h2 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#fff', color: '#000', padding: '0.5rem 1.25rem', fontSize: '2.25rem' }}>
+                Trương Phi Long
+              </h2>
+              <div style={{ marginTop: '0.25rem' }}>
+                <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.5rem 1rem', fontWeight: 'bold', fontSize: '0.875rem' }}>
+                  Engineering & Architecture Undergraduate - HCMUT
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+            {['Facebook', 'Instagram', 'YouTube', 'SoundCloud'].map(social => (
+              <button key={social} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0 1rem', height: '3rem', backgroundColor: '#fff', color: '#000', fontSize: '0.875rem' }}>
+                {social}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ marginTop: '2rem', borderTop: '4px solid rgba(255,255,255,0.2)', paddingTop: '2rem', maxWidth: '600px' }}>
+            <h3 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#FACB54', color: '#000', padding: '0.5rem 1rem', fontSize: '1.5rem', marginBottom: '1.25rem' }}>
+              Donate / Ủng hộ
+            </h3>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <div className="brutal-border brutal-shadow-purple" style={{ flex: 1, backgroundColor: '#fff', color: '#000', padding: '0.75rem 1rem', fontWeight: 'bold', fontSize: '0.875rem', minWidth: '200px' }}>
+                <span className="uppercase" style={{ color: '#3B2AA2', display: 'block', marginBottom: '0.25rem' }}>VCB Digibank</span> 
+                1012345678<br/>TRUONG PHI LONG
+              </div>
+              <div className="brutal-border brutal-shadow-mint" style={{ flex: 1, backgroundColor: '#fff', color: '#000', padding: '0.75rem 1rem', fontWeight: 'bold', fontSize: '0.875rem', minWidth: '200px' }}>
+                <span className="uppercase" style={{ color: '#a50064', display: 'block', marginBottom: '0.25rem' }}>MoMo</span> 
+                0987654321<br/>TRUONG PHI LONG
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
