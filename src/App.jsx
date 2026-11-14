@@ -523,7 +523,7 @@ const filteredSheets = sheets.filter(sheet => {
                       </span>
                     </div>
 
-                    {sheet.artists && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280' }}>Nghệ sĩ: {sheet.artists}</p>}
+                    {sheet.artists && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280' }}>{sheet.artists}</p>}
                     
                     <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', width: '100%' }}>
                       <Play size={16} /> Khán thính
