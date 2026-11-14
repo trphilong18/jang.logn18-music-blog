@@ -10,6 +10,16 @@ import { supabase } from './supabaseClient';
 
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
 
+const normalizeSearchText = (text) => {
+  return String(text ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
@@ -169,11 +179,29 @@ export default function App() {
 
   const dynamicGenres = ['All', ...new Set(sheets.map(s => s.genre).filter(Boolean))];
 
-  const filteredSheets = sheets.filter(sheet => {
-    const matchesSearch = sheet.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGenre = selectedGenre === 'All' || sheet.genre === selectedGenre;
-    return matchesSearch && matchesGenre;
-  });
+  
+const searchKeywords = normalizeSearchText(searchTerm)
+  .split(' ')
+  .filter(Boolean);
+
+const filteredSheets = sheets.filter(sheet => {
+  // Kết hợp tên nhạc khúc và nội dung mô tả
+  const searchableText = normalizeSearchText(
+    `${sheet.title ?? ''} ${sheet.description ?? ''}`
+  );
+
+  // Tất cả từ khóa phải xuất hiện trong dữ liệu
+  const matchesSearch = searchKeywords.every(keyword =>
+    searchableText.includes(keyword)
+  );
+
+  // Giữ nguyên tính năng lọc thể loại
+  const matchesGenre =
+    selectedGenre === 'All' || sheet.genre === selectedGenre;
+
+  return matchesSearch && matchesGenre;
+});
+
 
   const handlePlaySheet = (sheet) => {
     if (currentTrack?.id !== sheet.id) {
