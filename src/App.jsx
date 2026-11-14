@@ -363,7 +363,7 @@ export default function App() {
 
       <header className="brutal-border" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: '#fff', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <div className="font-title uppercase" style={{ fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => setCurrentView('home')}>
-          jang.logn18 music blog
+          jang.logn18 nhạc chí
         </div>
 
         {currentTrack && (
@@ -402,19 +402,19 @@ export default function App() {
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
               <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
-                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Dữ Liệu Nghe (Play Stats)</h2>
+                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1.5rem' }}>Thống kê</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontWeight: '500' }}>
-                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}><span>Tổng số bản nhạc:</span> <strong>{sheets.length} bài</strong></p>
-                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}><span>Bài viết blog:</span> <strong>{posts.length} bài</strong></p>
-                  <p style={{ display: 'flex', justifyContent: 'space-between' }}><span>Đã thích cá nhân:</span> <strong>{likedSheetIds.length} bài</strong></p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}><span>Tổng số nhạc phổ:</span> <strong>{sheets.length} bài</strong></p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.2)', paddingBottom: '0.25rem' }}><span>Tổng số võng chí:</span> <strong>{posts.length} bài</strong></p>
+                  <p style={{ display: 'flex', justifyContent: 'space-between' }}><span>Bạn đã lưu:</span> <strong>{likedSheetIds.length} bài</strong></p>
                 </div>
               </div>
 
               <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.5rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.5rem' }}>Tìm Kiếm & Chủ Đề</h2>
+                <h2 className="font-title uppercase" style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.5rem' }}>Tra cứu</h2>
                 <input 
                   type="text" 
-                  placeholder="Tìm kiếm bài hát..." 
+                  placeholder="Tra cứu nhạc khúc, nghệ sĩ, ca từ" 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="brutal-border"
@@ -475,7 +475,7 @@ export default function App() {
 
             <div>
               <h2 className="font-title uppercase brutal-border brutal-shadow-purple" style={{ display: 'inline-block', backgroundColor: '#39EFB2', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
-                Bản Nhạc Mới ({filteredSheets.length})
+                Nhạc phổ ({filteredSheets.length})
               </h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 320px))', gap: '1.5rem' }}>
                 {filteredSheets.map(sheet => (
@@ -492,7 +492,7 @@ export default function App() {
                     {sheet.description && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280' }}>{sheet.description}</p>}
                     
                     <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', width: '100%' }}>
-                      <Play size={16} /> Nghe & Xem Sheet
+                      <Play size={16} /> Khán thính
                     </button>
                   </div>
                 ))}
@@ -501,7 +501,7 @@ export default function App() {
 
             <div>
               <h2 className="font-title uppercase brutal-border brutal-shadow-yellow" style={{ display: 'inline-block', backgroundColor: '#3B2AA2', color: '#fff', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
-                Bài Viết (Blog)
+                Võng chí
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {posts.map(post => (
@@ -522,7 +522,7 @@ export default function App() {
 
         {currentView === 'post' && currentPost && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start' }}><ChevronLeft size={18} /> Quay Lại</button>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start' }}><ChevronLeft size={18} /> Quy hồi</button>
             <div className="brutal-border brutal-shadow-yellow" style={{ padding: '2.5rem', backgroundColor: '#fff' }}>
               <h1 className="font-title uppercase" style={{ fontSize: '2.5rem', lineHeight: 1.2, marginBottom: '1rem' }}>{currentPost.title}</h1>
               <div className="uppercase" style={{ fontWeight: 'bold', color: '#4b5563', borderBottom: '4px solid #000', display: 'inline-block', paddingBottom: '1rem', marginBottom: '2rem' }}>Đăng ngày: {currentPost.date}</div>
@@ -537,14 +537,14 @@ export default function App() {
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
                 <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', gap: '0.5rem' }}>
-                  <ChevronLeft size={18} /> Quay Lại
+                  <ChevronLeft size={18} /> Quy hồi
                 </button>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <button onClick={toggleLike} className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: isCurrentLiked ? '#ef4444' : '#fff', color: isCurrentLiked ? '#fff' : '#000', gap: '0.5rem' }}>
-                    <Heart size={16} fill={isCurrentLiked ? '#fff' : 'none'} /> {isCurrentLiked ? 'Đã Thích' : 'Thích'}
+                    <Heart size={16} fill={isCurrentLiked ? '#fff' : 'none'} /> {isCurrentLiked ? 'Đã Lưu' : 'Lưu'}
                   </button>
                   <button onClick={handleShare} className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', gap: '0.5rem' }}>
-                    <Share2 size={16} /> Chia Sẻ
+                    <Share2 size={16} /> Phức chế liên kết
                   </button>
                 </div>
               </div>
@@ -589,9 +589,9 @@ export default function App() {
               )}
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '2px solid #000', paddingTop: '1.25rem' }}>
-                {currentTrack.pdf_url && <a href={currentTrack.pdf_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#3B2AA2', color: '#fff', textDecoration: 'none', gap: '0.5rem' }}><FileDown size={16} /> Tải PDF Sheet</a>}
-                {currentTrack.midi_url && <a href={currentTrack.midi_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#FACB54', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><Disc size={16} /> Tải File MIDI</a>}
-                {currentTrack.audio_url && <a href={currentTrack.audio_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#fff', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><FileAudio size={16} /> Tải Audio MP3</a>}
+                {currentTrack.pdf_url && <a href={currentTrack.pdf_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#3B2AA2', color: '#fff', textDecoration: 'none', gap: '0.5rem' }}><FileDown size={16} /> Tải PDF</a>}
+                {currentTrack.midi_url && <a href={currentTrack.midi_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#FACB54', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><Disc size={16} /> Tải MIDI</a>}
+                {currentTrack.audio_url && <a href={currentTrack.audio_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#fff', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><FileAudio size={16} /> Tải MP3</a>}
               </div>
 
             </div>
@@ -636,7 +636,7 @@ export default function App() {
 
         {currentView === 'profile' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start' }}><ChevronLeft size={18} /> Quay Lại</button>
+            <button onClick={() => setCurrentView('home')} className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', alignSelf: 'flex-start' }}><ChevronLeft size={18} /> Quy hồi</button>
             <div className="brutal-border brutal-shadow-purple" style={{ padding: '2.5rem', backgroundColor: '#39EFB2', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h1 className="font-title uppercase" style={{ fontSize: '2rem' }}>{profile?.display_name}</h1>
@@ -646,7 +646,7 @@ export default function App() {
             </div>
 
             <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
-              <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bài Hát Đã Thích ({savedSheetsList.length})</h2>
+              <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Nhạc khúc đã lưu ({savedSheetsList.length})</h2>
               {savedSheetsList.map(sh => (
                 <div key={sh.id} className="brutal-btn brutal-border" style={{ width: '100%', padding: '0.5rem', backgroundColor: '#fff', justifyContent: 'space-between', marginBottom: '0.5rem' }} onClick={() => handlePlaySheet(sh)}>
                   <span>{sh.title}</span> <Play size={16}/>
@@ -675,10 +675,10 @@ export default function App() {
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.4rem 0.8rem', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                    ENGINEERING & ARCHITECTURE UNDERGRADUATE - HCMUT
+                    SOẠN GIẢ & TÁC GIẢ, SINH VIÊN KIẾN TRÚC TẠI HCMUT
                   </p>
                   <p style={{ color: '#fff', fontWeight: '500', fontSize: '0.9rem', wordWrap: 'break-word', overflowWrap: 'break-word', lineHeight: '1.4' }}>
-                    Engineering & Architecture Undergraduate - HCMUT
+                    Xin chào mọi người. Đây là nơi chia sẻ âm nhạc của mình. Mọi thứ ở đây đều miễn phí. Mọi người có thể ủng hộ mình bằng thông tin bên ô màu vàng bên cạnh nhé. Mình chân thành cảm ơn mọi người. Chúc một ngày tốt lành.
                   </p>
                 </div>
               </div>
