@@ -38,6 +38,10 @@ export default function App() {
   const [posts, setPosts] = useState([]);
   const [comments, setComments] = useState([]);
   const [likedSheetIds, setLikedSheetIds] = useState([]);
+  const [authReady, setAuthReady] = useState(false);
+  const [sheetsLoadError, setSheetsLoadError] = useState('');
+  const [likesError, setLikesError] = useState('');
+  const [isSavingLike, setIsSavingLike] = useState(false);
 
   // States tìm kiếm & lọc
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,14 +66,18 @@ export default function App() {
   const isAdmin = profile?.role === 'admin' || user?.email === 'trphilong18@gmail.com';
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        setIsLoggedIn(true);
-        setUser(session.user);
-        await fetchProfile(session.user.id);
-        fetchUserLikes(session.user.id);
-      }
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) console.error('Không khôi phục được phiên đăng nhập:', error);
+        if (session) {
+          setIsLoggedIn(true);
+          setUser(session.user);
+          fetchProfile(session.user.id);
+          fetchUserLikes(session.user.id);
+        }
+      })
+      .catch(error => console.error('Lỗi xác thực:', error))
+      .finally(() => setAuthReady(true));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
@@ -85,11 +93,43 @@ export default function App() {
       }
     });
 
-    fetchSheets();
-    fetchPosts();
-
     return () => subscription.unsubscribe();
   }, []);
+
+  // Chỉ đọc bảng sau khi Supabase đã khôi phục phiên đăng nhập.
+  // Hủy kết quả của lượt đọc cũ nếu người dùng đăng nhập/đăng xuất.
+  useEffect(() => {
+    if (!authReady) return;
+
+    let active = true;
+    const loadCatalog = async () => {
+      const [sheetResult, postResult] = await Promise.all([
+        supabase.from('sheets').select('*').order('created_at', { ascending: false }),
+        supabase.from('posts').select('*').order('created_at', { ascending: false })
+      ]);
+      if (!active) return;
+
+      if (sheetResult.error) {
+        console.error('Không đọc được bảng sheets:', sheetResult.error);
+        setSheetsLoadError(sheetResult.error.message);
+      } else {
+        setSheets(sheetResult.data ?? []);
+        setSheetsLoadError('');
+      }
+      if (postResult.error) {
+        console.error('Không đọc được bảng posts:', postResult.error);
+      } else {
+        setPosts(postResult.data ?? []);
+      }
+    };
+    loadCatalog().catch(error => {
+      if (!active) return;
+      console.error('Lỗi tải danh sách:', error);
+      setSheetsLoadError(error instanceof Error ? error.message : String(error));
+    });
+
+    return () => { active = false; };
+  }, [authReady, user?.id]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -112,21 +152,15 @@ export default function App() {
     }
   };
 
-  const fetchSheets = async () => {
-    const { data, error } = await supabase.from('sheets').select('*').order('created_at', { ascending: false });
-    if (!error && data) setSheets(data);
-  };
-
-  const fetchPosts = async () => {
-    const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-    if (!error && data) setPosts(data);
-  };
-
   const fetchUserLikes = async (userId) => {
     const { data, error } = await supabase.from('likes').select('sheet_id').eq('user_id', userId);
-    if (!error && data) {
-      setLikedSheetIds(data.map(item => item.sheet_id));
+    if (error) {
+      console.error('Không đọc được bài hát đã lưu:', error);
+      setLikesError(error.message);
+      return;
     }
+    setLikedSheetIds((data ?? []).map(item => item.sheet_id));
+    setLikesError('');
   };
 
   const fetchComments = async (sheetId) => {
@@ -262,16 +296,41 @@ const filteredSheets = sheets.filter(sheet => {
   };
 
   const toggleLike = async () => {
-    if (!isLoggedIn) return alert('Vui lòng đăng nhập!');
-    const sheetId = currentTrack.id;
-    const isLiked = likedSheetIds.includes(sheetId);
+    if (!isLoggedIn || !user?.id) return alert('Vui lòng đăng nhập!');
+    if (!currentTrack || isSavingLike) return;
 
-    if (isLiked) {
-      await supabase.from('likes').delete().eq('user_id', user.id).eq('sheet_id', sheetId);
-      setLikedSheetIds(likedSheetIds.filter(id => id !== sheetId));
-    } else {
-      await supabase.from('likes').insert([{ user_id: user.id, sheet_id: sheetId }]);
-      setLikedSheetIds([...likedSheetIds, sheetId]);
+    const sheetId = currentTrack.id;
+    const wasLiked = likedSheetIds.includes(sheetId);
+    setIsSavingLike(true);
+    setLikesError('');
+
+    try {
+      const { error: writeError } = wasLiked
+        ? await supabase.from('likes').delete().eq('user_id', user.id).eq('sheet_id', sheetId)
+        : await supabase.from('likes').insert([{ user_id: user.id, sheet_id: sheetId }]);
+
+      if (writeError) throw writeError;
+
+      // Xác nhận dữ liệu có thể đọc lại từ database, thay vì chỉ đổi trạng thái trên giao diện.
+      const { data, error: readError } = await supabase
+        .from('likes')
+        .select('sheet_id')
+        .eq('user_id', user.id);
+
+      if (readError) throw readError;
+      const savedIds = (data ?? []).map(item => item.sheet_id);
+      setLikedSheetIds(savedIds);
+
+      if (savedIds.includes(sheetId) === wasLiked) {
+        throw new Error('Không đọc lại được thay đổi vừa lưu. Hãy kiểm tra quyền SELECT/INSERT/DELETE (RLS) của bảng likes trong Supabase.');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Lỗi lưu bài hát:', error);
+      setLikesError(message);
+      alert('Không thể xác nhận thay đổi bài hát đã lưu: ' + message);
+    } finally {
+      setIsSavingLike(false);
     }
   };
 
@@ -511,6 +570,7 @@ const filteredSheets = sheets.filter(sheet => {
               <h2 className="font-title uppercase brutal-border brutal-shadow-purple" style={{ display: 'inline-block', backgroundColor: '#39EFB2', padding: '0.25rem 1rem', marginBottom: '1.5rem', fontSize: '1.875rem' }}>
                 Nhạc phổ ({filteredSheets.length})
               </h2>
+              {sheetsLoadError && <p role="alert" style={{ color: '#991b1b', backgroundColor: '#fef2f2', padding: '0.75rem', marginBottom: '1rem', fontWeight: 'bold' }}>Không thể tải danh sách nhạc từ Supabase: {sheetsLoadError}</p>}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 320px))', gap: '1.5rem' }}>
                 {filteredSheets.map(sheet => (
                   <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -574,7 +634,7 @@ const filteredSheets = sheets.filter(sheet => {
                   <ChevronLeft size={18} /> Quy hồi
                 </button>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <button onClick={toggleLike} className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: isCurrentLiked ? '#ef4444' : '#fff', color: isCurrentLiked ? '#fff' : '#000', gap: '0.5rem' }}>
+                  <button onClick={toggleLike} disabled={isSavingLike} className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: isCurrentLiked ? '#ef4444' : '#fff', color: isCurrentLiked ? '#fff' : '#000', gap: '0.5rem' }}>
                     <Heart size={16} fill={isCurrentLiked ? '#fff' : 'none'} /> {isCurrentLiked ? 'Đã Lưu' : 'Lưu'}
                   </button>
                   <button onClick={handleShare} className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', gap: '0.5rem' }}>
@@ -698,6 +758,7 @@ const filteredSheets = sheets.filter(sheet => {
 
             <div className="brutal-border brutal-shadow-purple" style={{ padding: '1.5rem', backgroundColor: '#FACB54' }}>
               <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Nhạc khúc đã lưu ({savedSheetsList.length})</h2>
+              {likesError && <p role="alert" style={{ color: '#991b1b', backgroundColor: '#fef2f2', padding: '0.75rem', marginBottom: '0.75rem', fontWeight: 'bold', overflowWrap: 'anywhere' }}>Lỗi đồng bộ bài hát đã lưu: {likesError}</p>}
               {savedSheetsList.map(sh => (
                 <div key={sh.id} className="brutal-btn brutal-border" style={{ width: '100%', padding: '0.5rem', backgroundColor: '#fff', justifyContent: 'space-between', marginBottom: '0.5rem' }} onClick={() => handlePlaySheet(sh)}>
                   <span>{sh.title}</span> <Play size={16}/>
