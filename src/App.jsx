@@ -49,7 +49,8 @@ export default function App() {
   // Form Admin (Thêm Sheet)
   const [newTitle, setNewTitle] = useState('');
   const [newGenre, setNewGenre] = useState('Classical');
-  const [newDescription, setNewDescription] = useState('');
+  const [newArtists, setNewArtists] = useState('');
+  const [newLyrics, setNewLyrics] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
   const [midiFile, setMidiFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
@@ -185,9 +186,9 @@ const searchKeywords = normalizeSearchText(searchTerm)
   .filter(Boolean);
 
 const filteredSheets = sheets.filter(sheet => {
-  // Kết hợp tên nhạc khúc và nội dung mô tả
+  // Tìm theo tên nhạc khúc, nghệ sĩ và ca từ
   const searchableText = normalizeSearchText(
-    `${sheet.title ?? ''} ${sheet.description ?? ''}`
+    `${sheet.title ?? ''} ${sheet.artists ?? ''} ${sheet.description ?? ''}`
   );
 
   // Tất cả từ khóa phải xuất hiện trong dữ liệu
@@ -318,9 +319,10 @@ const filteredSheets = sheets.filter(sheet => {
     }
 
     const newItem = {
-      title: newTitle,
+      title: newTitle.trim(),
       genre: newGenre,
-      description: newDescription,
+      artists: newArtists.trim(),
+      description: newLyrics,
       pdf_url, midi_url, audio_url,
       uploader_id: user.id
     };
@@ -329,7 +331,8 @@ const filteredSheets = sheets.filter(sheet => {
     if (!error && data) {
       setSheets([data[0], ...sheets]);
       setNewTitle('');
-      setNewDescription('');
+      setNewArtists('');
+      setNewLyrics('');
       setPdfFile(null); setMidiFile(null); setAudioFile(null);
       alert('Tải lên thành công!');
     } else {
@@ -469,16 +472,19 @@ const filteredSheets = sheets.filter(sheet => {
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
                   <form onSubmit={handleAddSheet} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <h3 className="font-title uppercase" style={{ fontSize: '1.125rem' }}>Tải Lên Sheet Nhạc & Mô Tả</h3>
+                    <h3 className="font-title uppercase" style={{ fontSize: '1.125rem' }}>Tải Lên Nhạc Phổ</h3>
                     <input type="text" placeholder="Tên bài hát..." value={newTitle} onChange={e => setNewTitle(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff' }} />
                     <input type="text" placeholder="Chủ đề / Thể loại (Genre)..." value={newGenre} onChange={e => setNewGenre(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff' }} />
+                    <label htmlFor="sheet-artists" style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Nghệ sĩ:</label>
+                    <input id="sheet-artists" type="text" placeholder="Tên nghệ sĩ / nhóm nghệ sĩ..." value={newArtists} onChange={e => setNewArtists(e.target.value)} className="brutal-border" style={{ padding: '0.5rem', backgroundColor: '#fff' }} />
+                    <label htmlFor="sheet-lyrics" style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Ca từ / Lời bài hát:</label>
                     
-                    <textarea 
-                      placeholder="Mô tả / Description..." 
-                      value={newDescription} 
-                      onChange={e => setNewDescription(e.target.value)} 
+                    <textarea id="sheet-lyrics"
+                      placeholder="Nhập lời bài hát (có thể xuống dòng)..." 
+                      value={newLyrics} 
+                      onChange={e => setNewLyrics(e.target.value)} 
                       className="brutal-border" 
-                      style={{ padding: '0.5rem', backgroundColor: '#fff', minHeight: '80px', resize: 'vertical' }}
+                      style={{ padding: '0.5rem', backgroundColor: '#fff', minHeight: '160px', resize: 'vertical' }}
                     ></textarea>
 
                     <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>PDF:</label>
@@ -517,7 +523,7 @@ const filteredSheets = sheets.filter(sheet => {
                       </span>
                     </div>
 
-                    {sheet.description && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280' }}>{sheet.description}</p>}
+                    {sheet.artists && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280' }}>Nghệ sĩ: {sheet.artists}</p>}
                     
                     <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', width: '100%' }}>
                       <Play size={16} /> Khán thính
@@ -578,6 +584,11 @@ const filteredSheets = sheets.filter(sheet => {
               </div>
 
               <h1 className="font-title uppercase" style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>{currentTrack.title}</h1>
+             {currentTrack.artists && (
+  <p style={{ fontSize: '1.05rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
+    {currentTrack.artists}
+  </p>
+)}
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#4b5563' }}>
                 <p className="uppercase">Thể loại: {currentTrack.genre}</p>
@@ -586,7 +597,7 @@ const filteredSheets = sheets.filter(sheet => {
                 </p>
               </div>
 
-              {currentTrack.description && <p style={{ fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', marginBottom: '1.5rem', lineHeight: 1.6 }}>{currentTrack.description}</p>}
+
               
               {currentTrack.audio_url ? (
                 <div className="brutal-border" style={{ padding: '1.25rem', backgroundColor: '#f3f4f6', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -616,6 +627,15 @@ const filteredSheets = sheets.filter(sheet => {
                 </div>
               )}
 
+              {currentTrack.description?.trim() && (
+                <details key={currentTrack.id} className="brutal-border" style={{ marginBottom: '1.5rem', backgroundColor: '#fff' }}>
+                  <summary className="font-title uppercase" style={{ cursor: 'pointer', padding: '0.85rem 1rem', fontSize: '1.5rem' }}>
+                    Ca từ
+                  </summary>
+                  <p style={{ padding: '1rem', borderTop: '2px solid #000', fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', lineHeight: 1.8 }}>{currentTrack.description}</p>
+                </details>
+              )}
+
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '2px solid #000', paddingTop: '1.25rem' }}>
                 {currentTrack.pdf_url && <a href={currentTrack.pdf_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#3B2AA2', color: '#fff', textDecoration: 'none', gap: '0.5rem' }}><FileDown size={16} /> Tải PDF</a>}
                 {currentTrack.midi_url && <a href={currentTrack.midi_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-yellow uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#FACB54', color: '#000', textDecoration: 'none', gap: '0.5rem' }}><Disc size={16} /> Tải MIDI</a>}
@@ -624,15 +644,18 @@ const filteredSheets = sheets.filter(sheet => {
 
             </div>
 
-            {currentTrack.pdf_url ? (
-              <div className="brutal-border brutal-shadow-purple" style={{ width: '100%', height: '700px', backgroundColor: '#fff' }}>
-                <iframe src={currentTrack.pdf_url} title={currentTrack.title} style={{ width: '100%', height: '100%', border: 'none' }} />
-              </div>
-            ) : (
-              <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#f9fafb' }}>
-                <p className="font-title uppercase" style={{ color: '#9ca3af' }}>Chưa có file PDF xem trước cho bản nhạc này</p>
-              </div>
-            )}
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <h2 className="font-title uppercase" style={{ fontSize: '1.5rem' }}>Nhạc phổ</h2>
+              {currentTrack.pdf_url ? (
+                <div className="brutal-border brutal-shadow-purple" style={{ width: '100%', height: '700px', backgroundColor: '#fff' }}>
+                  <iframe src={currentTrack.pdf_url} title={`Nhạc phổ: ${currentTrack.title}`} style={{ width: '100%', height: '100%', border: 'none' }} />
+                </div>
+              ) : (
+                <div className="brutal-border brutal-shadow-purple" style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#f9fafb' }}>
+                  <p className="font-title uppercase" style={{ color: '#9ca3af' }}>Chưa có file PDF xem trước cho bản nhạc này</p>
+                </div>
+              )}
+            </section>
 
             <div className="brutal-border brutal-shadow-yellow" style={{ padding: '1.5rem', backgroundColor: '#fff' }}>
               <h2 className="font-title uppercase" style={{ marginBottom: '1rem' }}>Bình Luận ({comments.length})</h2>
