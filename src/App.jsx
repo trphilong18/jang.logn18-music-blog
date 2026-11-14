@@ -20,6 +20,18 @@ const normalizeSearchText = (text) => {
     .trim();
 };
 
+const explainDatabaseError = (error) => {
+  if (typeof error === 'string') return error;
+  if (!error || typeof error !== 'object') return String(error ?? 'Lỗi không xác định');
+
+  const summary = error.message || 'Supabase trả về lỗi không xác định';
+  const code = error.code ? `Mã: ${error.code}` : '';
+  const details = error.details ? `Chi tiết: ${error.details}` : '';
+  const hint = error.hint ? `Gợi ý: ${error.hint}` : '';
+
+  return [summary, code, details, hint].filter(Boolean).join(' | ');
+};
+
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
@@ -156,7 +168,7 @@ export default function App() {
     const { data, error } = await supabase.from('likes').select('sheet_id').eq('user_id', userId);
     if (error) {
       console.error('Không đọc được bài hát đã lưu:', error);
-      setLikesError(error.message);
+      setLikesError(explainDatabaseError(error));
       return;
     }
     setLikedSheetIds((data ?? []).map(item => item.sheet_id));
@@ -325,7 +337,7 @@ const filteredSheets = sheets.filter(sheet => {
         throw new Error('Không đọc lại được thay đổi vừa lưu. Hãy kiểm tra quyền SELECT/INSERT/DELETE (RLS) của bảng likes trong Supabase.');
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = explainDatabaseError(error);
       console.error('Lỗi lưu bài hát:', error);
       setLikesError(message);
       alert('Không thể xác nhận thay đổi bài hát đã lưu: ' + message);
