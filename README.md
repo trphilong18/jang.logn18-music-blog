@@ -1,16 +1,34 @@
-# React + Vite
+# jang.logn18 Nhạc chí
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+jang.logn18 Nhạc chí (jang.logn18 music blog) là một dự án cá nhân của mình, Trương Phi Long, để đăng tải, lưu trữ và giới thiệu nhạc phổ, cũng như cho phép tải xuống trực tiếp các sản phẩm của mình.
 
-Currently, two official plugins are available:
+Dự án được xây dựng bằng React và Vite, sử dụng Supabase để quản lý dữ liệu, xác thực người dùng và lưu trữ tệp.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tính năng
 
-## React Compiler
+- Tra cứu và tiếp cận nhiều bản nhạc đa dạng;
+- Đăng nhập bằng tài khoản Google để lưu lại bản nhạc và bình luận;
+- Tải về file PDF, MIDI và MP3 dễ dàng;
+- Xem lời bài hát;
+- Xem võng chí (blog).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Công nghệ sử dụng
 
-## Expanding the ESLint configuration
+**Frontend**
+- React
+- Vite
+- JavaScript / JSX
+- CSS
+- Lucide React
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Backend và dịch vụ**
+- Supabase Authentication
+- Supabase Database
+- Supabase Storage
+- Vercel
+
+## Tác giả
+
+Dự án cá nhân của Trương Phi Long.
+
+GitHub: [trphilong18](https://github.com/trphilong18)
