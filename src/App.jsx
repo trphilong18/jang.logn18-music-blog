@@ -628,10 +628,12 @@ const filteredSheets = sheets.filter(sheet => {
               )}
 
               {currentTrack.description?.trim() && (
-                <section style={{ marginBottom: '1.5rem' }}>
-                  <h2 className="font-title uppercase" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Ca từ</h2>
-                  <p style={{ fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', lineHeight: 1.8 }}>{currentTrack.description}</p>
-                </section>
+                <details key={currentTrack.id} className="brutal-border" style={{ marginBottom: '1.5rem', backgroundColor: '#fff' }}>
+                  <summary className="font-title uppercase" style={{ cursor: 'pointer', padding: '0.85rem 1rem', fontSize: '1.5rem' }}>
+                    Ca từ
+                  </summary>
+                  <p style={{ padding: '1rem', borderTop: '2px solid #000', fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', lineHeight: 1.8 }}>{currentTrack.description}</p>
+                </details>
               )}
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '2px solid #000', paddingTop: '1.25rem' }}>
