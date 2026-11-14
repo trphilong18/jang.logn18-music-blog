@@ -3,10 +3,12 @@ import {
   Play, Pause, Heart, Share2, 
   User, FileText, ChevronLeft, Volume2,
   FileDown, FileAudio, Disc, MessageSquare, Send, Sparkles, Search, Upload, PlusCircle, Calendar,
-  Coffee
 } from 'lucide-react';
 
 import { supabase } from './supabaseClient';
+import SiteFooter from './components/SiteFooter.jsx';
+import SongCard from './components/SongCard.jsx';
+import LyricsSection from './components/LyricsSection.jsx';
 
 const MOCK_TOPICS = ['Piano Solo', 'Classical', 'Anime', 'Nhạc Việt', 'Jazz', 'Soundtrack'];
 
@@ -585,22 +587,7 @@ const filteredSheets = sheets.filter(sheet => {
               {sheetsLoadError && <p role="alert" style={{ color: '#991b1b', backgroundColor: '#fef2f2', padding: '0.75rem', marginBottom: '1rem', fontWeight: 'bold' }}>Không thể tải danh sách nhạc từ Supabase: {sheetsLoadError}</p>}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 320px))', gap: '1.5rem' }}>
                 {filteredSheets.map(sheet => (
-                  <div key={sheet.id} className="brutal-border brutal-shadow-mint" style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <h3 className="font-title uppercase truncate" style={{ fontSize: '1.125rem' }}>{sheet.title}</h3>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#4b5563' }}>
-                      <span className="uppercase">{sheet.genre}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <Calendar size={13} /> {formatDate(sheet.created_at)}
-                      </span>
-                    </div>
-
-                    {sheet.artists && <p className="line-clamp-2" style={{ fontSize: '0.8rem', color: '#6b7280' }}>{sheet.artists}</p>}
-                    
-                    <button onClick={() => handlePlaySheet(sheet)} className="brutal-btn brutal-border uppercase" style={{ marginTop: 'auto', padding: '0.75rem', backgroundColor: '#fff', width: '100%' }}>
-                      <Play size={16} /> Khán thính
-                    </button>
-                  </div>
+                  <SongCard key={sheet.id} sheet={sheet} formatDate={formatDate} onPlay={handlePlaySheet} />
                 ))}
               </div>
             </div>
@@ -699,14 +686,7 @@ const filteredSheets = sheets.filter(sheet => {
                 </div>
               )}
 
-              {currentTrack.description?.trim() && (
-                <details key={currentTrack.id} className="brutal-border" style={{ marginBottom: '1.5rem', backgroundColor: '#fff' }}>
-                  <summary className="font-title uppercase" style={{ cursor: 'pointer', padding: '0.85rem 1rem', fontSize: '1.5rem' }}>
-                    Ca từ
-                  </summary>
-                  <p style={{ padding: '1rem', borderTop: '2px solid #000', fontSize: '1rem', fontWeight: '500', color: '#1f2937', whiteSpace: 'pre-line', lineHeight: 1.8 }}>{currentTrack.description}</p>
-                </details>
-              )}
+              <LyricsSection key={currentTrack.id} track={currentTrack} />
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '2px solid #000', paddingTop: '1.25rem' }}>
                 {currentTrack.pdf_url && <a href={currentTrack.pdf_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.6rem 1.25rem', backgroundColor: '#3B2AA2', color: '#fff', textDecoration: 'none', gap: '0.5rem' }}><FileDown size={16} /> Tải PDF</a>}
@@ -781,73 +761,7 @@ const filteredSheets = sheets.filter(sheet => {
         )}
       </main>
 
-      {/* FOOTER ĐÃ KHÔI PHỤC ĐẦY ĐỦ AVATAR, Ô DONATE BÊN PHẢI VÀ CHỮ XUỐNG DÒNG ĐÚNG CHUẨN */}
-      <footer style={{ marginTop: '5rem', borderTop: '4px solid #000', backgroundColor: '#3B2AA2', padding: '4rem 1rem', position: 'relative', overflow: 'hidden', color: '#fff' }}>
-        <div style={{ maxWidth: '1152px', margin: '0 auto', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-          
-          {/* PHẦN 1: AVATAR, TIÊU ĐỀ, MÔ TẢ VÀ Ô DONATE BÊN PHẢI */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
-            
-            {/* CỤM BÊN TRÁI (AVATAR + TÊN + MÔ TẢ) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', flex: 1, minWidth: '280px' }}>
-              <div className="brutal-border brutal-shadow-yellow" style={{ width: '8rem', height: '8rem', backgroundColor: '#39EFB2', overflow: 'hidden', flexShrink: 0 }}>
-                <img src="/1794575745034.jpg" alt="Trương Phi Long" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: '220px', maxWidth: '450px' }}>
-                <h2 className="font-title uppercase brutal-border brutal-shadow-mint" style={{ display: 'inline-block', backgroundColor: '#fff', color: '#000', padding: '0.5rem 1.25rem', fontSize: '2rem', marginBottom: '0.75rem' }}>
-                  Trương Phi Long
-                </h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <p className="uppercase brutal-border" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.4rem 0.8rem', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                    SOẠN GIẢ & TÁC GIẢ, SINH VIÊN KIẾN TRÚC TẠI HCMUT
-                  </p>
-                  <p style={{ color: '#fff', fontWeight: '500', fontSize: '0.9rem', wordWrap: 'break-word', overflowWrap: 'break-word', lineHeight: '1.4' }}>
-                    Xin chào mọi người. Đây là nơi chia sẻ âm nhạc của mình. Mọi thứ ở đây đều miễn phí. Mọi người có thể ủng hộ mình bằng thông tin bên ô màu vàng bên cạnh nhé. Mình chân thành cảm ơn mọi người. Chúc một ngày tốt lành.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* CỤM BÊN PHẢI (Ô DONATE VÀNG) */}
-            <div className="brutal-border brutal-shadow-mint" style={{ padding: '1.25rem', backgroundColor: '#FACB54', color: '#000', display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '320px', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1rem' }}>
-                <Coffee size={20} /> Ủng hộ mình
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: '500', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                <div>
-                  <span style={{ fontWeight: 'bold' }}>MoMo:</span><br/>
-                  <strong>0817311006 (Trương Phi Long)</strong>
-                </div>
-                <div>
-                  <span style={{ fontWeight: 'bold' }}>Vietcombank:</span><br/>
-                  <strong>1817311006 (TRUONG PHI LONG)</strong>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* PHẦN 2: CÁC NÚT LIÊN KẾT MẠNG XÃ HỘI Ở DƯỚI */}
-          <div style={{ borderTop: '2px dashed rgba(255,255,255,0.3)', paddingTop: '2rem', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
-              Instagram
-            </a>
-            <a href="https://facebook.com/jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
-              Facebook
-            </a>
-            <a href="https://tiktok.com/@jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
-              TikTok
-            </a>
-            <a href="https://soundcloud.com/jang_logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
-              SoundCloud
-            </a>
-            <a href="https://youtube.com/@jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
-              YouTube
-            </a>
-          </div>
-
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
