@@ -291,7 +291,7 @@ const filteredSheets = sheets.filter(sheet => {
       setComments([data[0], ...comments]);
       setNewCommentText('');
     } else {
-      alert('Lỗi gửi bình luận: ' + error.message);
+      alert('Lỗi đăng bình luận: ' + error.message);
     }
   };
 
@@ -662,7 +662,7 @@ const filteredSheets = sheets.filter(sheet => {
               {isLoggedIn ? (
                 <form onSubmit={handleAddComment} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
                   <textarea value={newCommentText} onChange={e => setNewCommentText(e.target.value)} className="brutal-border" style={{ padding: '0.75rem', minHeight: '80px', backgroundColor: '#fff' }} placeholder="Nhập bình luận của bạn..."></textarea>
-                  <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', alignSelf: 'flex-end', gap: '0.5rem' }}><Send size={16} /> Gửi Bình Luận</button>
+                  <button type="submit" className="brutal-btn brutal-border brutal-shadow-mint uppercase" style={{ padding: '0.5rem 1rem', backgroundColor: '#39EFB2', alignSelf: 'flex-end', gap: '0.5rem' }}><Send size={16} /> Đăng Bình Luận</button>
                 </form>
               ) : <p style={{ marginBottom: '1rem', fontWeight: 'bold' }}>Vui lòng đăng nhập để tham gia bình luận.</p>}
 
@@ -768,7 +768,7 @@ const filteredSheets = sheets.filter(sheet => {
             <a href="https://soundcloud.com/jang_logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
               SoundCloud
             </a>
-            <a href="https://youtube.com@jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
+            <a href="https://youtube.com/@jang.logn18" target="_blank" rel="noreferrer" className="brutal-btn brutal-border uppercase" style={{ padding: '0.5rem 1.25rem', backgroundColor: '#fff', color: '#000', fontSize: '0.85rem', textDecoration: 'none' }}>
               YouTube
             </a>
           </div>
