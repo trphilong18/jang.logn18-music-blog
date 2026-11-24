@@ -23,7 +23,7 @@ export default function SiteFooter() {
                     SOẠN GIẢ & TÁC GIẢ, SINH VIÊN KIẾN TRÚC TẠI HCMUT
                   </p>
                   <p style={{ color: '#fff', fontWeight: '500', fontSize: '0.9rem', wordWrap: 'break-word', overflowWrap: 'break-word', lineHeight: '1.4' }}>
-                    Xin chào mọi người. Mình là Phi Long 飛龍, tự là Hồng Ân 洪恩, hiệu là Khánh Hi 慶僖. Đây là nơi mình chia sẻ các bản nhạc mà mình đã phổ. Mọi người có thể tải về và sử dụng cá nhân. Nếu được, xin hãy ủng hộ mình một tách cà phê qua thông tin bên ô màu vàng. Mình xin chân thành cảm ơn
+                    Xin chào mọi người. Mình là Phi Long 飛龍, tự là Hồng Ân 洪恩, hiệu là Khánh Hi 慶僖. Đây là nơi mình chia sẻ các bản nhạc mà mình đã phổ. Mọi người có thể tải về và sử dụng cá nhân. Nếu được, xin hãy ủng hộ mình một tách cà phê qua thông tin bên ô màu vàng. Mình xin chân thành cảm ơn.
                   </p>
                 </div>
               </div>
@@ -42,6 +42,10 @@ export default function SiteFooter() {
                 <div>
                   <span style={{ fontWeight: 'bold' }}>Vietcombank:</span><br/>
                   <strong>1817311006 (TRUONG PHI LONG)</strong>
+                </div>
+                <div>
+                  <span style={{ fontWeight: 'bold' }}>PayPal:</span><br/>
+                  <strong>@trphilong18 (Trương Phi Long)</strong>
                 </div>
               </div>
             </div>
