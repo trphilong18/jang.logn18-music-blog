@@ -45,7 +45,7 @@ export default function SiteFooter() {
                 </div>
                 <div>
                   <span style={{ fontWeight: 'bold' }}>PayPal:</span><br/>
-                  <strong>@trphilong18 (Trương Phi Long)</strong>
+                  <strong>@janglogn18 (Trương Phi Long)</strong>
                 </div>
               </div>
             </div>
